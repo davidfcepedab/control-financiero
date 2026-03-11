@@ -32,42 +32,24 @@ type OverviewResponse = {
 export default function FinanzasOverview() {
   const { month } = useFinance()
   const [data, setData] = useState<OverviewResponse | null>(null)
-  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (!month) return
 
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`/api/finanzas/overview?month=${month}`)
-        if (!res.ok) throw new Error("API error")
-        const json = await res.json()
-        setData(json)
-      } catch (err) {
-        console.error("Overview fetch error:", err)
-        setError(true)
-      }
-    }
-
-    fetchData()
+    fetch(`/api/finanzas/overview?month=${month}`)
+      .then((res) => res.json())
+      .then((json) => setData(json))
+      .catch(() => setData(null))
   }, [month])
-
-  if (error) {
-    return (
-      <div className="p-6 text-red-500">
-        Error cargando datos financieros
-      </div>
-    )
-  }
 
   if (!data) return null
 
   const {
-    ingresos = 0,
-    flujo_total = 0,
-    liquidez = 0,
-    runway = 0,
-    monthlyData = [],
+    ingresos,
+    flujo_total,
+    liquidez,
+    runway,
+    monthlyData,
   } = data
 
   const formatMoney = (value: number) =>
@@ -75,26 +57,12 @@ export default function FinanzasOverview() {
       maximumFractionDigits: 0,
     }).format(Math.round(value || 0))
 
-  const formatMillions = (value: number) => {
-    const millions = value / 1_000_000
-    return `${millions.toFixed(0)}M`
-  }
-
-  // ⚠️ Formatter compatible 100% con Recharts + TS strict
-  const formatTooltip = (
-    value: number | string,
-    name?: string
-  ): [string, string] => {
-    const numeric =
-      typeof value === "number"
-        ? value
-        : Number(value ?? 0)
-
-    return [`$${formatMoney(numeric)}`, name ?? ""]
-  }
+  const formatMillions = (value: number) =>
+    `${Math.round(value / 1_000_000)}M`
 
   return (
     <div className="space-y-8">
+
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-4">
         <div className="card p-4">
@@ -137,7 +105,7 @@ export default function FinanzasOverview() {
             <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
             <XAxis dataKey="month" />
             <YAxis tickFormatter={formatMillions} />
-            <Tooltip formatter={formatTooltip} />
+            <Tooltip />
             <Legend />
             <ReferenceLine y={0} stroke="#9CA3AF" strokeWidth={2} />
 
