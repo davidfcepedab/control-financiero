@@ -59,8 +59,9 @@ export default function CheckinPage() {
 
   const scaleOptions = Array.from({ length: 10 }, (_, i) => i + 1)
 
+
 return (
-  <div className="space-y-8 pb-24">
+  <div className="space-y-10 pb-28">
 
     {/* =========================
         ESTADO MENTAL
@@ -71,103 +72,164 @@ return (
       </h2>
 
       {[
-        { label: "Sueño", key: "sueno" },
+        { label: "Sueño", key: "calidadSueno" },
         { label: "Energía", key: "energia" },
         { label: "Ansiedad", key: "ansiedad" },
         { label: "Estado ánimo", key: "estadoAnimo" },
       ].map((item) => (
         <div key={item.key} className="space-y-2">
           <p className="text-sm text-gray-600">{item.label}</p>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            className="w-full accent-rose-500"
-          />
+
+          <div className="flex gap-2 flex-wrap">
+            {scaleOptions.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => handleChange(item.key, n)}
+                className={`w-8 h-8 rounded-full text-sm font-medium transition
+                  ${
+                    form[item.key] === n
+                      ? "bg-rose-500 text-white"
+                      : "bg-white border border-rose-200 text-rose-500"
+                  }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
         </div>
       ))}
     </div>
 
     {/* =========================
-        FÍSICO
+        ENTRENAMIENTO
     ========================== */}
-    <div className="bg-emerald-50 rounded-2xl p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-emerald-600">
-        Físico
+    <div className="bg-blue-50 rounded-2xl p-6 space-y-6">
+      <h2 className="text-lg font-semibold text-blue-600">
+        Entrenamiento
       </h2>
 
       <div className="flex items-center gap-3">
-        <input type="checkbox" />
-        <span className="text-sm text-gray-600">
+        <input
+          type="checkbox"
+          checked={form.entreno}
+          onChange={(e) =>
+            handleChange("entreno", e.target.checked)
+          }
+          className="w-4 h-4"
+        />
+        <span className="text-sm text-gray-700">
           Hoy entrené
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <input
-          type="number"
-          placeholder="Peso (kg)"
-          className="input"
-        />
-        <input
-          type="number"
-          placeholder="Cintura (cm)"
-          className="input"
-        />
-      </div>
-    </div>
+      {form.entreno && (
+        <div className="space-y-4">
 
-    {/* =========================
-        PROFESIONAL
-    ========================== */}
-    <div className="bg-orange-50 rounded-2xl p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-orange-500">
-        Profesional
-      </h2>
+          <div>
+            <label className="text-sm text-gray-600">
+              Tipo de entrenamiento
+            </label>
+            <select
+              value={form.tipoEntreno}
+              onChange={(e) =>
+                handleChange("tipoEntreno", e.target.value)
+              }
+              className="w-full mt-1 p-2 rounded-lg border border-gray-300"
+            >
+              <option value="">Seleccionar</option>
+              <option>Push Volumen</option>
+              <option>Upper Pesado</option>
+              <option>Upper Metabolico</option>
+              <option>Pull Espalda Dominante</option>
+              <option>Deltoide Especializacion</option>
+              <option>Lower Mantenimiento</option>
+              <option>Natacion</option>
+              <option>Dia de descanso</option>
+            </select>
+          </div>
 
-      {[
-        { label: "Deep Work", key: "deepWork" },
-        { label: "Productividad", key: "productividad" },
-      ].map((item) => (
-        <div key={item.key} className="space-y-2">
-          <p className="text-sm text-gray-600">{item.label}</p>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            className="w-full accent-orange-500"
-          />
+          <div>
+            <label className="text-sm text-gray-600">
+              Minutos entrenados
+            </label>
+            <input
+              type="number"
+              value={form.minutosEntreno}
+              onChange={(e) =>
+                handleChange("minutosEntreno", e.target.value)
+              }
+              className="w-full mt-1 p-2 rounded-lg border border-gray-300"
+              placeholder="Ej: 60"
+            />
+          </div>
+
         </div>
-      ))}
+      )}
     </div>
 
     {/* =========================
-        CONEXIÓN
+        PRODUCTIVIDAD
     ========================== */}
-    <div className="bg-indigo-50 rounded-2xl p-6 space-y-6">
-      <h2 className="text-lg font-semibold text-indigo-600">
-        Conexión
+    <div className="bg-emerald-50 rounded-2xl p-6 space-y-6">
+      <h2 className="text-lg font-semibold text-emerald-600">
+        Productividad
       </h2>
 
       <div className="space-y-2">
-        <p className="text-sm text-gray-600">
-          Calidad conexión
-        </p>
+        <p className="text-sm text-gray-600">Deep Work</p>
         <input
-          type="range"
-          min="1"
-          max="10"
-          className="w-full accent-indigo-500"
+          type="number"
+          value={form.deepWork}
+          onChange={(e) =>
+            handleChange("deepWork", e.target.value)
+          }
+          className="w-full p-2 rounded-lg border border-gray-300"
+          placeholder="Horas"
         />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-sm text-gray-600">Productividad (1-10)</p>
+        <div className="flex gap-2 flex-wrap">
+          {scaleOptions.map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => handleChange("productividad", n)}
+              className={`w-8 h-8 rounded-full text-sm font-medium transition
+                ${
+                  form.productividad === n
+                    ? "bg-emerald-500 text-white"
+                    : "bg-white border border-emerald-200 text-emerald-600"
+                }`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
 
     {/* =========================
         BOTÓN GUARDAR
     ========================== */}
-    <button className="w-full py-4 rounded-2xl text-white font-medium bg-gradient-to-r from-teal-400 to-indigo-500 shadow-md">
-      Guardar Check-In
-    </button>
+    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t">
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="w-full bg-black text-white py-3 rounded-xl font-medium"
+      >
+        {loading ? "Guardando..." : "Guardar Check-in"}
+      </button>
+
+      {success && (
+        <p className="text-center text-sm text-green-600 mt-2">
+          Guardado correctamente
+        </p>
+      )}
+    </div>
+
   </div>
 )
 }
