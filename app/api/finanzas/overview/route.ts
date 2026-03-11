@@ -1,40 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
-
-import { NextRequest, NextResponse } from "next/server"
 import { financialScoreEngine } from "@/lib/engines/financialScoreEngine"
 import { financialInsightEngine } from "@/lib/engines/financialInsightEngine"
 import { financialStabilityEngine } from "@/lib/engines/financialStabilityEngine"
 import { financialPredictionEngine } from "@/lib/engines/financialPredictionEngine"
-
-const credentialsString = process.env.GOOGLE_CREDENTIALS
-
-let auth
-
-if (credentialsString) {
-  auth = new google.auth.GoogleAuth({
-    credentials: JSON.parse(credentialsString),
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  })
-} else {
-  console.warn("⚠ GOOGLE_CREDENTIALS not defined")
-  auth = new google.auth.GoogleAuth({
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  })
-}
-
-const sheets = google.sheets({ version: "v4", auth })
 
 const SPREADSHEET_ID =
   "1A8ucJUgSvxP2JLbPf1Z5PlB5UytbO4aKdJLf_ctaUz4"
 
 export async function GET(req: NextRequest) {
   try {
-    const requestedMonth = req.nextUrl.searchParams.get("month")
+    const requestedMonth =
+      req.nextUrl.searchParams.get("month")
 
-    // =============================
-    // 1. BASE MENSUAL
-    // =============================
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: "Base mensual CFO!A2:H1000",
@@ -68,7 +46,8 @@ export async function GET(req: NextRequest) {
     const flujoTotal = Number(monthRow[6] || 0)
 
     const gastoMensualTotal =
-      Math.abs(gastoOperativo) + Math.abs(gastoFinanciero)
+      Math.abs(gastoOperativo) +
+      Math.abs(gastoFinanciero)
 
     const monthlyData = cleanRows.slice(-6).map((r) => ({
       month: r[0],
@@ -78,9 +57,6 @@ export async function GET(req: NextRequest) {
       flujo: Number(r[6] || 0),
     }))
 
-    // =============================
-    // 2. LIQUIDEZ (CUENTAS)
-    // =============================
     const cuentas = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: "Cuentas!A2:J200",
@@ -100,12 +76,11 @@ export async function GET(req: NextRequest) {
 
     const runway =
       gastoMensualTotal > 0
-        ? Number((liquidezTotal / gastoMensualTotal).toFixed(1))
+        ? Number(
+            (liquidezTotal / gastoMensualTotal).toFixed(1)
+          )
         : 0
 
-    // =============================
-    // 3. ENGINES
-    // =============================
     const score = financialScoreEngine({
       ingresos,
       gastoOp: gastoOperativo,
@@ -134,9 +109,6 @@ export async function GET(req: NextRequest) {
       liquidez: liquidezTotal,
     })
 
-    // =============================
-    // 4. RESPONSE
-    // =============================
     return NextResponse.json({
       ingresos,
       gasto_operativo: gastoOperativo,
@@ -150,10 +122,14 @@ export async function GET(req: NextRequest) {
       stability,
       prediction,
     })
-  } catch (error) {
-    console.error(error)
+  } catch (error: any) {
+    console.error("OVERVIEW ERROR:", error?.message)
+
     return NextResponse.json(
-      { error: "Error cargando overview financiero" },
+      {
+        error: "Error cargando overview financiero",
+        details: error?.message,
+      },
       { status: 500 }
     )
   }
