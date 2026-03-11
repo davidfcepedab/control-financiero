@@ -3,7 +3,6 @@
 import { useState } from "react"
 
 export default function CheckinPage() {
-
   const today = new Date().toISOString().split("T")[0]
 
   const [form, setForm] = useState<any>({
@@ -36,7 +35,6 @@ export default function CheckinPage() {
   }
 
   const handleSubmit = async () => {
-
     if (!form.calidadSueno || !form.energia || !form.estadoAnimo) {
       alert("Completa los campos principales")
       return
@@ -61,106 +59,50 @@ export default function CheckinPage() {
 
   return (
     <div className="space-y-8">
-
       <div className="card">
-
         <h1 className="text-2xl font-semibold mb-6">
           Check-In Diario
         </h1>
 
         {/* ==============================
-            FECHA
-        ============================== */}
-
-        <div className="space-y-4 mb-8">
-
-          <input
-            type="date"
-            value={form.fecha}
-            onChange={(e) => handleChange("fecha", e.target.value)}
-            className="w-full border rounded-xl px-4 py-3"
-          />
-
-          <div className="flex gap-6 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.hoy}
-                onChange={() => {
-                  handleChange("hoy", true)
-                  handleChange("ayer", false)
-                  handleChange("fecha", today)
-                }}
-              />
-              Hoy
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={form.ayer}
-                onChange={() => {
-                  const yesterday = new Date(Date.now() - 86400000)
-                    .toISOString()
-                    .split("T")[0]
-                  handleChange("ayer", true)
-                  handleChange("hoy", false)
-                  handleChange("fecha", yesterday)
-                }}
-              />
-              Fue ayer
-            </label>
-          </div>
-        </div>
-
-        {/* ==============================
             ESTADO MENTAL
         ============================== */}
 
-        <Section
-          title="Estado Mental"
-          color="#EE3A93"
-        >
-
+        <Section title="Estado Mental" color="#EE3A93">
           <ScaleInput
             label="Sueño"
             value={form.calidadSueno}
-            onChange={(v) => handleChange("calidadSueno", v)}
+            onChange={(v: number) => handleChange("calidadSueno", v)}
             options={scaleOptions}
           />
 
           <ScaleInput
             label="Energía"
             value={form.energia}
-            onChange={(v) => handleChange("energia", v)}
+            onChange={(v: number) => handleChange("energia", v)}
             options={scaleOptions}
           />
 
           <ScaleInput
             label="Ansiedad"
             value={form.ansiedad}
-            onChange={(v) => handleChange("ansiedad", v)}
+            onChange={(v: number) => handleChange("ansiedad", v)}
             options={scaleOptions}
           />
 
           <ScaleInput
             label="Estado ánimo"
             value={form.estadoAnimo}
-            onChange={(v) => handleChange("estadoAnimo", v)}
+            onChange={(v: number) => handleChange("estadoAnimo", v)}
             options={scaleOptions}
           />
-
         </Section>
 
         {/* ==============================
             FÍSICO
         ============================== */}
 
-        <Section
-          title="Físico"
-          color="#3FC5BB"
-        >
-
+        <Section title="Físico" color="#3FC5BB">
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -189,7 +131,7 @@ export default function CheckinPage() {
                 className="w-full border rounded-xl px-4 py-3"
                 value={form.minutosEntreno}
                 onChange={(e) =>
-                  handleChange("minutosEntreno", e.target.value)
+                  handleChange("minutosEntreno", Number(e.target.value))
                 }
               />
             </>
@@ -202,141 +144,75 @@ export default function CheckinPage() {
               className="border rounded-xl px-4 py-3"
               value={form.peso}
               onChange={(e) =>
-                handleChange("peso", e.target.value)
+                handleChange("peso", Number(e.target.value))
               }
             />
+
             <input
               type="number"
               placeholder="Cintura (cm)"
               className="border rounded-xl px-4 py-3"
               value={form.cintura}
               onChange={(e) =>
-                handleChange("cintura", e.target.value)
+                handleChange("cintura", Number(e.target.value))
               }
             />
           </div>
-
         </Section>
 
         {/* ==============================
             CONEXIÓN
         ============================== */}
 
-        <Section
-          title="Conexión"
-          color="#6C4CE3"
-        >
-
+        <Section title="Conexión" color="#6C4CE3">
           <ScaleInput
             label="Calidad conexión"
             value={form.calidadConexion}
-            onChange={(v) =>
+            onChange={(v: number) =>
               handleChange("calidadConexion", v)
             }
             options={scaleOptions}
           />
-
         </Section>
 
         {/* ==============================
-            PRODUCTIVIDAD
+            PROFESIONAL
         ============================== */}
 
-        <Section
-          title="Productividad"
-          color="#3B82F6"
-        >
-
-          <input
-            type="number"
-            placeholder="Deep Work (hrs)"
-            className="w-full border rounded-xl px-4 py-3"
+        <Section title="Profesional" color="#FF8C42">
+          <ScaleInput
+            label="Deep Work"
             value={form.deepWork}
-            onChange={(e) =>
-              handleChange("deepWork", e.target.value)
+            onChange={(v: number) =>
+              handleChange("deepWork", v)
             }
+            options={scaleOptions}
           />
 
           <ScaleInput
             label="Productividad"
             value={form.productividad}
-            onChange={(v) =>
+            onChange={(v: number) =>
               handleChange("productividad", v)
             }
             options={scaleOptions}
           />
-
         </Section>
-
-        {/* ==============================
-            BOTÓN
-        ============================== */}
 
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className={`w-full mt-8 rounded-2xl py-4 font-semibold transition-all duration-300
-          ${success
-              ? "bg-emerald-500 text-white scale-105"
-              : "bg-black text-white hover:scale-105"
-            }`}
+          className="w-full bg-black text-white py-3 rounded-xl mt-6"
         >
-          {loading
-            ? "Guardando..."
-            : success
-            ? "✓ Guardado"
-            : "Guardar Check-In"}
+          {loading ? "Guardando..." : "Guardar Check-In"}
         </button>
 
+        {success && (
+          <div className="text-green-600 text-sm mt-4">
+            Check-in guardado correctamente
+          </div>
+        )}
       </div>
-    </div>
-  )
-}
-
-/* ======================================
-   COMPONENTES AUXILIARES
-====================================== */
-
-function Section({ title, color, children }: any) {
-  return (
-    <div
-      className="p-6 rounded-2xl mb-8 space-y-4"
-      style={{
-        backgroundColor: `${color}0D`, // 5% approx
-        borderLeft: `4px solid ${color}`,
-      }}
-    >
-      <h2
-        className="text-sm uppercase tracking-wide font-semibold"
-        style={{ color }}
-      >
-        {title}
-      </h2>
-
-      {children}
-    </div>
-  )
-}
-
-function ScaleInput({ label, value, onChange, options }: any) {
-  return (
-    <div>
-      <label className="text-xs text-gray-500">
-        {label}
-      </label>
-
-      <select
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full mt-1 border rounded-xl px-4 py-3"
-      >
-        <option value="">Selecciona</option>
-        {options.map((n: number) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
     </div>
   )
 }
