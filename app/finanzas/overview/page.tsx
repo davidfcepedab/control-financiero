@@ -13,8 +13,6 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts"
-import type { TooltipProps } from "recharts"
-import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent"
 
 type MonthlyRow = {
   month: string
@@ -26,9 +24,9 @@ type MonthlyRow = {
 type OverviewResponse = {
   ingresos: number
   flujo_total: number
-  monthlyData: MonthlyRow[]
   liquidez: number
   runway: number
+  monthlyData: MonthlyRow[]
 }
 
 export default function FinanzasOverview() {
@@ -39,24 +37,37 @@ export default function FinanzasOverview() {
   useEffect(() => {
     if (!month) return
 
-    fetch(`/api/finanzas/overview?month=${month}`)
-      .then((res) => {
-        if (!res.ok) throw new Error()
-        return res.json()
-      })
-      .then(setData)
-      .catch(() => setError(true))
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`/api/finanzas/overview?month=${month}`)
+        if (!res.ok) throw new Error("API error")
+        const json = await res.json()
+        setData(json)
+      } catch (err) {
+        console.error("Overview fetch error:", err)
+        setError(true)
+      }
+    }
+
+    fetchData()
   }, [month])
 
-  if (error) return <div>Error cargando datos financieros</div>
+  if (error) {
+    return (
+      <div className="p-6 text-red-500">
+        Error cargando datos financieros
+      </div>
+    )
+  }
+
   if (!data) return null
 
   const {
     ingresos = 0,
     flujo_total = 0,
-    monthlyData = [],
     liquidez = 0,
     runway = 0,
+    monthlyData = [],
   } = data
 
   const formatMoney = (value: number) =>
@@ -65,22 +76,25 @@ export default function FinanzasOverview() {
     }).format(Math.round(value || 0))
 
   const formatMillions = (value: number) => {
-    if (typeof value !== "number") return ""
     const millions = value / 1_000_000
     return `${millions.toFixed(0)}M`
   }
 
-  // ✅ Tipado correcto para Recharts
-  const formatTooltip: TooltipProps<ValueType, NameType>["formatter"] = (
-    value
-  ) => {
-    if (typeof value !== "number") return ""
-    return `$${formatMoney(value)}`
+  // ⚠️ Formatter compatible 100% con Recharts + TS strict
+  const formatTooltip = (
+    value: number | string,
+    name?: string
+  ): [string, string] => {
+    const numeric =
+      typeof value === "number"
+        ? value
+        : Number(value ?? 0)
+
+    return [`$${formatMoney(numeric)}`, name ?? ""]
   }
 
   return (
     <div className="space-y-8">
-
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-4">
         <div className="card p-4">
