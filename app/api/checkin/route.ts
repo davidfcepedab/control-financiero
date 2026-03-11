@@ -1,12 +1,5 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
-
-const auth = new google.auth.GoogleAuth({
-  keyFile: "google-credentials.json",
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-})
-
-const sheets = google.sheets({ version: "v4", auth })
 
 const SPREADSHEET_ID = "1fEP_Em30-BTUhmeObzAE9zObQRc7CNkYXbVCecpCHO0"
 
@@ -14,54 +7,44 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    // ==============================
-    // 🧠 MAPEO EXACTO DE COLUMNAS
-    // ==============================
-    // Solo columnas manuales
-    // A, E, F, H, I, J, K, L, M, Q, R, S, T, U, V, W, X, Y, Z, AA, AC, AF, AI, AJ, AK, AL, AM, AN, AO
-
     const newRow = [
-      body.fecha || "",                 // A
-      "", "", "",                       // B C D (fórmulas)
-      body.horaDespertar || "",         // E
-      body.horaDormir || "",            // F
-      "",                               // G (fórmula)
-      body.calidadSueno || "",          // H
-      body.energia || "",               // I
-      body.ansiedad || "",              // J
-      body.estadoAnimo || "",           // K
-      body.dietaCumplida || 0,          // L
-      body.agua || "",                  // M
-      "", "", "",                       // N O P (fórmulas)
-      body.meditacion || "",            // Q
-      body.lectura || "",               // R
-      body.avanceProyecto || 0,         // S
-      body.tiempoPareja || 0,           // T
-      body.calidadConexion || "",       // U
-      body.interaccionSocial || 0,      // V
-      body.entreno || 0,                // W
-      body.tipoEntreno || "",           // X
-      body.minutosEntreno || "",        // Y
-      body.deepWork || "",              // Z
-      body.productividad || "",         // AA
-      "",                               // AB (fórmula)
-      body.peso || "",                  // AC
-      "", "",                           // AD AE (fórmulas)
-      body.cintura || "",               // AF
-      "",                               // AG (fórmula)
-      "",                               // AH (fórmula)
-      body.pecho || "",                 // AI
-      body.hombros || "",               // AJ
-      body.bicepsDer || "",             // AK
-      body.bicepsIzq || "",             // AL
-      body.cuadricepsDer || "",         // AM
-      body.cuadricepsIzq || "",         // AN
-      body.gluteos || "",               // AO
+      body.fecha || "",                 
+      "", "", "",                       
+      body.horaDespertar || "",         
+      body.horaDormir || "",            
+      "",                               
+      body.calidadSueno || "",          
+      body.energia || "",               
+      body.ansiedad || "",              
+      body.estadoAnimo || "",           
+      body.dietaCumplida || 0,          
+      body.agua || "",                  
+      "", "", "",                       
+      body.meditacion || "",            
+      body.lectura || "",               
+      body.avanceProyecto || 0,         
+      body.tiempoPareja || 0,           
+      body.calidadConexion || "",       
+      body.interaccionSocial || 0,      
+      body.entreno || 0,                
+      body.tipoEntreno || "",           
+      body.minutosEntreno || "",        
+      body.deepWork || "",              
+      body.productividad || "",         
+      "",                               
+      body.peso || "",                  
+      "", "",                           
+      body.cintura || "",               
+      "",                               
+      "",                               
+      body.pecho || "",                 
+      body.hombros || "",               
+      body.bicepsDer || "",             
+      body.bicepsIzq || "",             
+      body.cuadricepsDer || "",         
+      body.cuadricepsIzq || "",         
+      body.gluteos || "",               
     ]
-
-    // ==============================
-    // 📌 APPEND SEGURO
-    // ==============================
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
