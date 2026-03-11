@@ -6,7 +6,7 @@ import { financialStabilityEngine } from "@/lib/engines/financialStabilityEngine
 import { financialPredictionEngine } from "@/lib/engines/financialPredictionEngine"
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: "google-credentials.json",
+  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!),
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 })
 
