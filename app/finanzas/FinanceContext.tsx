@@ -21,7 +21,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export const useFinance = (): FinanceContextValue | null => {
-  const context = useContext(FinanceContext)
-  return context ?? null
+export const useFinance = () => {
+  return useContext(FinanceContext)
 }
