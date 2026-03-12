@@ -21,8 +21,6 @@ interface Category {
   total: number
   previousTotal?: number
   budget?: number
-  budgetUsedPercent?: number
-  budgetStatus?: "green" | "yellow" | "red"
   subcategories?: Subcategory[]
 }
 
@@ -140,7 +138,7 @@ export default function FinanzasCategories() {
         </p>
       </div>
 
-      {/* Totales por cluster */}
+      {/* Totales cluster */}
       <div className="flex justify-center gap-16 text-center">
         <div>
           <p className="text-xs uppercase text-gray-500 tracking-wide mb-1">
@@ -189,27 +187,6 @@ export default function FinanzasCategories() {
         </span>
       </div>
 
-      {/* Insight estructural */}
-      {advanced && (
-        <div className="max-w-md mx-auto text-center">
-          {fixedPct > 70 && (
-            <div className="bg-rose-50 rounded-lg p-4 text-rose-700 text-sm">
-              Alta rigidez estructural. {fixedPct}% del gasto es fijo.
-            </div>
-          )}
-          {fixedPct <= 70 && fixedPct > 50 && (
-            <div className="bg-amber-50 rounded-lg p-4 text-amber-700 text-sm">
-              Estructura equilibrada.
-            </div>
-          )}
-          {fixedPct <= 50 && (
-            <div className="bg-blue-50 rounded-lg p-4 text-blue-700 text-sm">
-              Buena flexibilidad estructural.
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ===================== */}
       {/* SECCIONES OPERATIVAS */}
       {/* ===================== */}
@@ -233,18 +210,24 @@ export default function FinanzasCategories() {
 
           {section.items.map(cat => {
 
+            const spent = Math.abs(cat.total)
+            const budget = cat.budget ?? 0
+            const hasBudget = budget > 0
+
+            const difference = spent - budget
+            const differenceAbs = Math.abs(difference)
+
+            const usagePercent =
+              budget === 0 ? 0 : (spent / budget) * 100
+
+            let budgetStatus: "green" | "yellow" | "red" = "green"
+            if (usagePercent > 100) budgetStatus = "red"
+            else if (usagePercent > 80) budgetStatus = "yellow"
+
             const percent =
               section.clusterBase > 0
-                ? (Math.abs(cat.total) / section.clusterBase) * 100
+                ? (spent / section.clusterBase) * 100
                 : 0
-
-            const previous = cat.previousTotal ?? 0
-            const delta = cat.total - previous
-
-            const deltaPct =
-              previous === 0
-                ? cat.total > 0 ? 100 : 0
-                : (delta / previous) * 100
 
             const hasSubcategories =
               Array.isArray(cat.subcategories) &&
@@ -259,7 +242,6 @@ export default function FinanzasCategories() {
                 {/* HEADER */}
                 <div className="flex justify-between items-center gap-4">
 
-                  {/* Nombre + toggle */}
                   <button
                     onClick={() => toggleCategory(cat.name)}
                     className="flex items-center gap-2 text-left"
@@ -274,22 +256,11 @@ export default function FinanzasCategories() {
                     )}
                   </button>
 
-                  {/* Monto (navega) */}
                   <button
                     onClick={() => navigateToTransactions(cat.name)}
-                    className="text-right"
+                    className="font-semibold hover:text-blue-600 hover:underline"
                   >
-                    <p className="font-semibold hover:text-blue-600 hover:underline">
-                      -${formatMoney(cat.total)}
-                    </p>
-
-                    {advanced && delta !== 0 && (
-                      <p className={`text-xs ${
-                        delta > 0 ? "text-rose-500" : "text-blue-600"
-                      }`}>
-                        {delta > 0 ? "↑" : "↓"} {Math.abs(deltaPct).toFixed(1)}%
-                      </p>
-                    )}
+                    -${formatMoney(cat.total)}
                   </button>
 
                 </div>
@@ -302,17 +273,66 @@ export default function FinanzasCategories() {
                   />
                 </div>
 
-                {/* Presupuesto compacto */}
-                {cat.budget && (
-                  <div className="text-sm text-gray-600">
-                    Presupuesto ${formatMoney(cat.budget)}
-                  </div>
-                )}
+                {/* Presupuesto compacto + diferencia */}
+                {hasBudget && (
+                  <div
+                    className={`p-3 rounded-lg border text-sm space-y-1 ${
+                      budgetStatus === "red"
+                        ? "bg-rose-50 border-rose-200"
+                        : budgetStatus === "yellow"
+                        ? "bg-amber-50 border-amber-200"
+                        : "bg-emerald-50 border-emerald-200"
+                    }`}
+                  >
 
-                {/* Presupuesto expandido */}
-                {advanced && cat.budget && (
-                  <div className="text-xs text-gray-600">
-                    Uso {Math.round(cat.budgetUsedPercent ?? 0)}%
+                    <div className="flex justify-between font-medium">
+                      <span>Presupuesto</span>
+                      <span>${formatMoney(budget)}</span>
+                    </div>
+
+                    <div
+                      className={`flex justify-between ${
+                        budgetStatus === "red"
+                          ? "text-rose-600"
+                          : budgetStatus === "yellow"
+                          ? "text-amber-600"
+                          : "text-emerald-600"
+                      }`}
+                    >
+                      <span>
+                        {difference > 0
+                          ? "Sobre ejecución"
+                          : difference < 0
+                          ? "Sub ejecución"
+                          : "En línea"}
+                      </span>
+                      <span>
+                        {difference === 0
+                          ? "$0"
+                          : `${difference > 0 ? "+" : "-"}$${formatMoney(differenceAbs)}`}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>Uso</span>
+                      <span>{usagePercent.toFixed(0)}%</span>
+                    </div>
+
+                    {advanced && (
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                        <div
+                          className={`h-1.5 rounded-full ${
+                            budgetStatus === "red"
+                              ? "bg-rose-500"
+                              : budgetStatus === "yellow"
+                              ? "bg-amber-500"
+                              : "bg-emerald-500"
+                          }`}
+                          style={{ width: `${Math.min(usagePercent, 100)}%` }}
+                        />
+                      </div>
+                    )}
+
                   </div>
                 )}
 
