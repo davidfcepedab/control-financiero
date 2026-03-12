@@ -105,6 +105,39 @@ export default function FinanzasCategories() {
         </ResponsiveContainer>
       </div>
 
+      {advanced && (
+  <div className="mt-4 space-y-1 text-sm text-center">
+
+    <div className="flex justify-center gap-6 font-semibold">
+      <span className="text-rose-400">
+        Fijos {fixedPct}%
+      </span>
+      <span className="text-blue-600">
+        Variables {variablePct}%
+      </span>
+    </div>
+
+    {fixedPct > 70 && (
+      <div className="text-rose-500">
+        Alta rigidez estructural. El gasto fijo limita flexibilidad.
+      </div>
+    )}
+
+    {fixedPct <= 70 && fixedPct > 50 && (
+      <div className="text-amber-500">
+        Estructura equilibrada, monitorear.
+      </div>
+    )}
+
+    {fixedPct <= 50 && (
+      <div className="text-blue-600">
+        Buena flexibilidad estructural.
+      </div>
+    )}
+
+  </div>
+)}
+
       {/* SECCIONES */}
       {[{
         title: "Movimientos Fijos",
