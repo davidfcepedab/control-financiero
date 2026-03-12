@@ -27,37 +27,34 @@ interface TransactionsResponse {
 export default function TransactionsClient() {
   const finance = useFinance()
   const searchParams = useSearchParams()
+  const month = finance?.month ?? ""
+  const category = searchParams.get("category")
+  const subcategory = searchParams.get("subcategory")
 
   const [data, setData] = useState<TransactionsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  if (!finance) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        <p>Inicializando...</p>
-      </div>
-    )
-  }
-
-  const { month } = finance
+  const month = finance?.month
   const categoryFilter = searchParams.get("category")
+  const subcategoryFilter = searchParams.get("subcategory")
 
   useEffect(() => {
-    if (!month) {
-      setData(null)
-      return
-    }
+    if (!month) return
 
-    const fetchTransactions = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
         let url = `/api/finanzas/transactions?month=${encodeURIComponent(month)}`
 
-        if (categoryFilter) {
-          url += `&category=${encodeURIComponent(categoryFilter)}`
+        if (category) {
+          url += `&category=${encodeURIComponent(category)}`
+        }
+
+        if (subcategoryFilter) {
+          url += `&subcategory=${encodeURIComponent(subcategoryFilter)}`
         }
 
         const response = await fetch(url)
@@ -66,7 +63,8 @@ export default function TransactionsClient() {
           throw new Error(`Error ${response.status}: ${response.statusText}`)
         }
 
-        const json: TransactionsResponse = await response.json()
+        const res = await fetch(url)
+        const json = await res.json()
 
         if (!json.success) {
           throw new Error(json.error || "Error desconocido")
@@ -84,7 +82,15 @@ export default function TransactionsClient() {
     }
 
     fetchTransactions()
-  }, [month, categoryFilter])
+  }, [month, categoryFilter, subcategoryFilter])
+
+  if (!finance) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Inicializando...</p>
+      </div>
+    )
+  }
 
   // Estado de carga
   if (loading) {
@@ -95,27 +101,16 @@ export default function TransactionsClient() {
     )
   }
 
-  // Estado de error
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-        <p className="font-semibold">Error al cargar movimientos</p>
-        <p className="text-sm mt-1">{error}</p>
-      </div>
-    )
-  }
+  if (loading) return <p>Cargando...</p>
 
-  // Sin datos
-  if (!data) {
+  if (error)
     return (
       <div className="p-6 text-center text-gray-500">
-        <p>No hay datos disponibles</p>
+        <p>Sin movimientos registrados para este período.</p>
       </div>
     )
-  }
 
-  const transactions = data.transactions || []
-  const hasTransactions = transactions.length > 0
+  if (!data) return null
 
   return (
     <div className="space-y-6">
@@ -123,7 +118,10 @@ export default function TransactionsClient() {
       {categoryFilter && (
         <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
           <span className="text-gray-500">Filtro: </span>
-          <span className="font-medium text-gray-800">{categoryFilter}</span>
+          <span className="font-medium text-gray-800">
+            {categoryFilter}
+            {subcategoryFilter && ` › ${subcategoryFilter}`}
+          </span>
         </div>
       )}
 
@@ -140,26 +138,27 @@ export default function TransactionsClient() {
       {/* Transacciones */}
       {hasTransactions ? (
         <div className="space-y-3">
-          {transactions.map((tx) => (
+          {transactions.map((tx, index) => (
             <div
-              key={tx.id}
+              key={index}
               className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
             >
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{tx.description}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(tx.date).toLocaleDateString("es-CO")}
-                </p>
-                {tx.category && (
-                  <p className="text-xs text-gray-400 mt-1">{tx.category}</p>
+                <p className="font-medium text-gray-900">{tx.descripcion}</p>
+                <p className="text-xs text-gray-500 mt-1">{tx.fecha}</p>
+                {tx.categoria && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    {tx.categoria}
+                    {tx.subcategoria && ` › ${tx.subcategoria}`}
+                  </p>
                 )}
               </div>
 
               <div className="text-right">
                 <p className={`font-semibold text-lg ${
-                  tx.amount < 0 ? "text-red-600" : "text-green-600"
+                  tx.monto < 0 ? "text-red-600" : "text-green-600"
                 }`}>
-                  {tx.amount < 0 ? "-" : "+"}${Math.abs(tx.amount).toLocaleString("es-CO")}
+                  {tx.monto < 0 ? "-" : "+"}${Math.abs(tx.monto).toLocaleString("es-CO")}
                 </p>
               </div>
             </div>
@@ -168,12 +167,11 @@ export default function TransactionsClient() {
       ) : (
         <div className="p-6 text-center bg-gray-50 rounded-lg">
           <p className="text-gray-600">
-            {categoryFilter
-              ? `No hay movimientos en la categoría "${categoryFilter}" para este mes.`
-              : "No hay movimientos registrados para este mes."}
+            Sin movimientos registrados para este período.
           </p>
         </div>
       )}
+
     </div>
   )
 }

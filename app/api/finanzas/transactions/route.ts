@@ -5,7 +5,7 @@ import {
   mapRowToTransaction,
 } from "@/lib/mappers/transaction.mapper"
 
-const SPREADSHEET_ID = "1fEP_Em30-BTUhmeObzAE9zObQRc7CNkYXbVCecpCHO0"
+const SPREADSHEET_ID = "1A8ucJUgSvxP2JLbPf1Z5PlB5UytbO4aKdJLf_ctaUz4"
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,6 +15,9 @@ export async function GET(req: NextRequest) {
 
     const category =
       req.nextUrl.searchParams.get("category")
+
+    const subcategory =
+      req.nextUrl.searchParams.get("subcategory")
 
     const movimientosRes =
       await sheets.spreadsheets.values.get({
