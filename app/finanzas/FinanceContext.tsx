@@ -4,14 +4,10 @@ import { createContext, useContext, useState } from "react"
 
 const FinanceContext = createContext<any>(null)
 
-export function FinanceProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const [month, setMonth] = useState(
-    new Date().toISOString().slice(0, 7)
-  )
+export function FinanceProvider({ children }: any) {
+  const today = new Date().toISOString().slice(0, 7)
+
+  const [month, setMonth] = useState(today)
 
   return (
     <FinanceContext.Provider value={{ month, setMonth }}>
@@ -20,6 +16,4 @@ export function FinanceProvider({
   )
 }
 
-export function useFinance() {
-  return useContext(FinanceContext)
-}
+export const useFinance = () => useContext(FinanceContext)
