@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
-import { mapRowToTransaction } from "@/lib/mappers/transaction.mapper"
+import {
+  filterTransactionRows,
+  mapRowToTransaction,
+} from "@/lib/mappers/transaction.mapper"
 
 const SPREADSHEET_ID = "1A8ucJUgSvxP2JLbPf1Z5PlB5UytbO4aKdJLf_ctaUz4"
 
@@ -23,37 +26,32 @@ export async function GET(req: NextRequest) {
         valueRenderOption: "UNFORMATTED_VALUE",
       })
 
-    const rawRows = movimientosRes.data.values || []
+    const rows = movimientosRes.data.values || []
 
-    const transactions = rawRows
-      .map(mapRowToTransaction)
-      .filter((tx) => {
-        if (!tx.mes) return false
-        if (tx.mes !== month) return false
-        if (category && tx.categoria !== category) return false
-        if (subcategory && tx.subcategoria !== subcategory) return false
-        return true
-      })
+    const filtered = filterTransactionRows(rows, month, category)
 
-    const total = transactions.reduce(
+    const transactions = filtered.map(mapRowToTransaction)
+
+    const subtotal = transactions.reduce(
       (acc, tx) => acc + tx.amount,
       0
     )
 
     return NextResponse.json({
       success: true,
-      transactions,
-      total,
+      data: {
+        transactions,
+        subtotal,
+        previousSubtotal: 0,
+        delta: 0,
+      },
     })
 
   } catch (error: any) {
     console.error("TRANSACTIONS ERROR:", error?.message)
 
     return NextResponse.json(
-      {
-        success: false,
-        error: "Error cargando transacciones",
-      },
+      { success: false, error: "Error cargando transacciones" },
       { status: 500 }
     )
   }

@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     if (!cfoRows.length) {
       return NextResponse.json(
-        { error: "Sin datos financieros" },
+        { success: false, error: "Sin datos financieros" },
         { status: 404 }
       )
     }
@@ -100,26 +100,26 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-      ingresos,
-      gasto_operativo: gastoOperativo,
-      gasto_financiero: gastoFinanciero,
-      flujo_total: flujoTotal,
-      monthlyData,
-      liquidez: liquidezTotal,
-      runway,
-      score,
-      insight,
-      stability,
-      prediction,
+      success: true,
+      data: {
+        ingresos,
+        gasto_operativo: gastoOperativo,
+        gasto_financiero: gastoFinanciero,
+        flujo_total: flujoTotal,
+        monthlyData,
+        liquidez: liquidezTotal,
+        runway,
+        score,
+        insight,
+        stability,
+        prediction,
+      },
     })
   } catch (error: any) {
     console.error("OVERVIEW ERROR:", error?.message)
 
     return NextResponse.json(
-      {
-        error: "Error cargando overview financiero",
-        details: error?.message,
-      },
+      { success: false, error: "Error cargando overview financiero" },
       { status: 500 }
     )
   }

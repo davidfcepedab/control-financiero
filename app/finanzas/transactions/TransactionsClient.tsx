@@ -5,16 +5,22 @@ import { useFinance } from "../FinanceContext"
 import { useSearchParams } from "next/navigation"
 
 interface Transaction {
-  fecha: string
-  descripcion: string
-  categoria: string
-  subcategoria: string
-  monto: number
+  id: string
+  date: string
+  description: string
+  amount: number
+  category?: string
+  subcategory?: string
+}
+
+interface TransactionsData {
+  transactions: Transaction[]
+  subtotal?: number
 }
 
 interface TransactionsResponse {
-  transactions: Transaction[]
-  subtotal?: number
+  success: boolean
+  data?: TransactionsData
   error?: string
 }
 
@@ -25,7 +31,7 @@ export default function TransactionsClient() {
   const category = searchParams.get("category")
   const subcategory = searchParams.get("subcategory")
 
-  const [data, setData] = useState<TransactionsResponse | null>(null)
+  const [data, setData] = useState<TransactionsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -60,14 +66,16 @@ export default function TransactionsClient() {
         const res = await fetch(url)
         const json = await res.json()
 
-        if (json.error) {
-          throw new Error(json.error)
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
         }
 
-        setData(json)
-
-      } catch (err: any) {
-        setError(err.message)
+        setData(json.data ?? null)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Error desconocido"
+        setError(errorMessage)
+        console.error("Error fetching transactions:", err)
+        setData(null)
       } finally {
         setLoading(false)
       }

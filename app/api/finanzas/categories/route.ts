@@ -41,21 +41,21 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-      ...structural,
-      structuralCategories: structuralWithBudget.map((cat) => ({
-        ...cat,
-        subcategories: cat.subs || [],
-      })),
+      success: true,
+      data: {
+        ...structural,
+        structuralCategories: structuralWithBudget.map(cat => ({
+          ...cat,
+          subcategories: cat.subs || [],
+        })),
+      },
     })
 
   } catch (error: any) {
     console.error("CATEGORIES ERROR:", error?.message)
 
     return NextResponse.json(
-      {
-        success: false,
-        error: "Error cargando categorías",
-      },
+      { success: false, error: "Error cargando categorías" },
       { status: 500 }
     )
   }

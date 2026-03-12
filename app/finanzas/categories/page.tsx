@@ -26,6 +26,12 @@ interface CategoriesData {
   totalVariable?: number
 }
 
+interface CategoriesResponse {
+  success: boolean
+  data?: CategoriesData
+  error?: string
+}
+
 export default function FinanzasCategories() {
   const finance = useFinance()
   const router = useRouter()
@@ -53,6 +59,47 @@ export default function FinanzasCategories() {
       </div>
     )
   }
+
+  const { month } = finance
+
+  useEffect(() => {
+    if (!month) {
+      setData(null)
+      return
+    }
+
+    const fetchCategories = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch(
+          `/api/finanzas/categories?month=${encodeURIComponent(month)}`
+        )
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`)
+        }
+
+        const json: CategoriesResponse = await response.json()
+
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
+        }
+
+        setData(json.data ?? null)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Error desconocido"
+        setError(errorMessage)
+        console.error("Error fetching categories:", err)
+        setData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [month])
 
   // Estado de carga
   if (loading) {
@@ -229,9 +276,14 @@ export default function FinanzasCategories() {
                 // Delta comparison
                 const catDelta = cat.delta ?? 0
                 const hasDelta = cat.delta !== undefined && cat.delta !== 0
-                const isDeltaNegative = hasDelta && catDelta < 0
-                const deltaPercent = hasDelta && Math.abs(cat.total - catDelta) > 0
-                  ? Number(((Math.abs(catDelta) / Math.abs(cat.total - catDelta)) * 100).toFixed(1))
+                const isDeltaNegative = hasDelta && (cat.delta ?? 0) < 0
+                const deltaPercent = hasDelta
+                  ? (() => {
+                      const denominator = Math.abs(cat.total - (cat.delta ?? 0))
+                      return denominator !== 0
+                        ? Math.abs(Number(((Math.abs(cat.delta ?? 0) / denominator) * 100).toFixed(1)))
+                        : 0
+                    })()
                   : 0
 
                 // Budget
@@ -372,7 +424,7 @@ export default function FinanzasCategories() {
                                 : "text-emerald-600"
                             }`}
                           >
-                            ${formatMoney(cat.budget || 0)}
+                            {"$" + formatMoney(cat.budget || 0)}
                           </span>
                         </div>
 

@@ -74,8 +74,7 @@ export function financialAdvancedEngine({
     }
   })
 
-  const structuralCategories: Category[] = Object.entries(currentMap)
-    .filter(([, data]) => Math.abs(data.total) > 0)
+  const structuralCategories = Object.entries(currentMap)
     .map(([name, data]) => {
       const previousTotal = previousMap[name]?.total || 0
       const delta = data.total - previousTotal
@@ -93,6 +92,7 @@ export function financialAdvancedEngine({
         subs,
       }
     })
+    .filter((c) => Math.abs(c.total) > 0)
 
   const financialCategories = Object.entries(financialMap).map(
     ([name, total]) => (
