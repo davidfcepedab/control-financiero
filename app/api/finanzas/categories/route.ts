@@ -55,13 +55,10 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-  VERSION: "INSIGHT_V2_ACTIVA",
-  ...structural,
-  structuralCategories: structuralWithBudget,
-  insight,
-  prediction,
-})
-
+      ...structural,
+      structuralCategories: structuralWithBudget,
+    })
+    
   } catch (error: any) {
     console.error("CATEGORIES ERROR:", error?.message)
 

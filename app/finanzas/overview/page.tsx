@@ -39,6 +39,8 @@ export default function FinanzasOverview() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const month = finance?.month
+
   useEffect(() => {
     if (!month) {
       setData(null)
@@ -77,6 +79,14 @@ export default function FinanzasOverview() {
 
     fetchOverview()
   }, [month])
+
+  if (!finance) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Inicializando...</p>
+      </div>
+    )
+  }
 
   // Estado de carga
   if (loading) {

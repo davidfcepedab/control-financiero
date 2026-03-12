@@ -30,6 +30,9 @@ export default function TransactionsClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const month = finance?.month
+  const categoryFilter = searchParams.get("category")
+
   useEffect(() => {
     if (!month) return
 
@@ -67,7 +70,22 @@ export default function TransactionsClient() {
     fetchData()
   }, [month, category, subcategory])
 
-  if (!finance) return null
+  if (!finance) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Inicializando...</p>
+      </div>
+    )
+  }
+
+  // Estado de carga
+  if (loading) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Cargando movimientos...</p>
+      </div>
+    )
+  }
 
   if (loading) return <p>Cargando...</p>
 

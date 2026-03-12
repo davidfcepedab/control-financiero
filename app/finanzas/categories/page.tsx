@@ -34,6 +34,10 @@ export default function FinanzasCategories() {
   const [data, setData] = useState<CategoriesData | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [advanced, setAdvanced] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const month = finance?.month
 
   useEffect(() => {
     if (!month) return
@@ -42,8 +46,41 @@ export default function FinanzasCategories() {
       .then(setData)
   }, [month])
 
-  if (!finance) return null
-  if (!data) return null
+  if (!finance) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Inicializando...</p>
+      </div>
+    )
+  }
+
+  // Estado de carga
+  if (loading) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Cargando categorías...</p>
+      </div>
+    )
+  }
+
+  // Estado de error
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <p className="font-semibold">Error al cargar categorías</p>
+        <p className="text-sm mt-1">{error}</p>
+      </div>
+    )
+  }
+
+  // Sin datos
+  if (!data) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>No hay datos disponibles</p>
+      </div>
+    )
+  }
 
   const {
     structuralCategories = [],
