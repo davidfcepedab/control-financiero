@@ -198,12 +198,12 @@ export default function FinanzasCategories() {
       </div>
 
       {/* TOTALS SUMMARY */}
-      <div className="flex justify-center gap-16 text-center mb-8">
+      <div className="flex justify-center gap-4 sm:gap-16 text-center mb-6 sm:mb-8">
         <div>
           <p className="text-xs uppercase text-gray-500 tracking-wide mb-1">
             Movimientos Fijos
           </p>
-          <p className="text-2xl font-bold text-rose-500">
+          <p className="text-xl sm:text-2xl font-bold text-rose-500">
             ${formatMoney(absFixed)}
           </p>
         </div>
@@ -211,15 +211,15 @@ export default function FinanzasCategories() {
           <p className="text-xs uppercase text-gray-500 tracking-wide mb-1">
             Movimientos Variables
           </p>
-          <p className="text-2xl font-bold text-blue-600">
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">
             ${formatMoney(absVariable)}
           </p>
         </div>
       </div>
 
       {/* DONUT CHART */}
-      <div className="card p-6 bg-white rounded-lg shadow">
-        <div className="h-64">
+      <div className="card p-4 sm:p-6 bg-white rounded-lg shadow">
+        <div className="h-56 sm:h-72 md:h-80">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -244,7 +244,7 @@ export default function FinanzasCategories() {
       {/* ANÁLISIS AVANZADO */}
       {advanced && (
         <div className="max-w-md mx-auto space-y-3 text-center mb-8">
-          <div className="flex justify-center gap-10 font-semibold text-sm">
+          <div className="flex justify-center gap-6 sm:gap-10 font-semibold text-sm">
             <span className="text-rose-500">
               Fijos: {fixedPct}%
             </span>

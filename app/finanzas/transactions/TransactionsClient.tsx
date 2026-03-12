@@ -126,7 +126,7 @@ export default function TransactionsClient() {
       {hasTransactions && data.total !== undefined && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-gray-600">Total de movimientos</p>
-          <p className="text-2xl font-bold text-blue-600">
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">
             ${Math.abs(data.total).toLocaleString("es-CO")}
           </p>
         </div>
@@ -140,7 +140,7 @@ export default function TransactionsClient() {
               key={tx.id}
               className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
             >
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900">{tx.description}</p>
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(tx.date).toLocaleDateString("es-CO")}
@@ -150,7 +150,7 @@ export default function TransactionsClient() {
                 )}
               </div>
 
-              <div className="text-right">
+              <div className="text-right shrink-0 ml-3">
                 <p className={`font-semibold text-lg ${
                   tx.amount < 0 ? "text-red-600" : "text-green-600"
                 }`}>

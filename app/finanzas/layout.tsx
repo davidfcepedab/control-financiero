@@ -35,7 +35,7 @@ function FinanzasLayoutContent({
     <div className="space-y-6">
       {/* HEADER */}
       <div
-        className="rounded-3xl p-6 text-white"
+        className="rounded-3xl p-4 sm:p-6 text-white"
         style={{
           background:
             "linear-gradient(135deg, #9BE9C0 0%, #6EE7B7 100%)",
@@ -45,7 +45,7 @@ function FinanzasLayoutContent({
           Finanzas
         </p>
 
-        <p className="text-2xl font-semibold mt-2">
+        <p className="text-xl sm:text-2xl font-semibold mt-2">
           Control Estratégico
         </p>
 

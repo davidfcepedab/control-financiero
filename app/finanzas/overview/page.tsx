@@ -212,7 +212,7 @@ export default function FinanzasOverview() {
             Ingresos vs Gasto Operativo vs Flujo (6 meses)
           </h3>
 
-          <div className="w-full h-64 sm:h-72 md:h-80">
+          <div className="w-full h-56 sm:h-72 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
