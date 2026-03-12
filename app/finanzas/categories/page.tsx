@@ -11,8 +11,11 @@ import {
 import { useRouter } from "next/navigation"
 
 export default function FinanzasCategories() {
-  const { month } = useFinance()
+  const finance = useFinance()
   const router = useRouter()
+
+  if (!finance) return null
+  const { month } = finance
 
   const [data, setData] = useState<any>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
