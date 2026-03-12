@@ -1,4 +1,3 @@
-cat > app/finanzas/categories/page.tsx << 'EOF'
 "use client"
 
 import { useEffect, useState } from "react"
@@ -337,4 +336,3 @@ export default function FinanzasCategories() {
     </div>
   )
 }
-EOF
