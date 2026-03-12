@@ -44,12 +44,9 @@ export async function GET(req: NextRequest) {
     })
     
     return NextResponse.json({
-  ...structural,
-  structuralCategories: structuralWithBudget.map(cat => ({
-    ...cat,
-    subcategories: cat.subs || [],
-  })),
-})
+      ...structural,
+      structuralCategories: structuralWithBudget,
+    })
     
   } catch (error: any) {
     console.error("CATEGORIES ERROR:", error?.message || error)

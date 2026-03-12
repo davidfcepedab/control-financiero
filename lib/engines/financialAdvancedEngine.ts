@@ -83,7 +83,7 @@ export function financialAdvancedEngine({
         previousTotal,
         delta,
         type: FIXED_CATEGORIES.includes(name) ? "fixed" : "variable",
-        subs: Object.entries(data.subs).map(([sub, value]) => ({
+        subcategories: Object.entries(data.subs).map(([sub, value]) => ({
           name: sub,
           total: value,
         })),
