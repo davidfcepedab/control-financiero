@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useFinance } from "../FinanceContext"
 import {
   ResponsiveContainer,
@@ -20,6 +20,7 @@ interface Category {
   type: "fixed" | "variable"
   total: number
   previousTotal?: number
+  delta?: number
   budget?: number
   budgetUsedPercent?: number
   budgetStatus?: "green" | "yellow" | "red"
@@ -42,139 +43,101 @@ export default function FinanzasCategories() {
 
   const [data, setData] = useState<CategoriesData | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
-  const [advanced, setAdvanced] = useState(true)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [advanced, setAdvanced] = useState(false)
 
-  if (!finance) {
-    return <div className="p-6 text-center text-gray-500">Inicializando...</div>
-  }
+  if (!finance) return null
 
   const { month } = finance
 
   useEffect(() => {
     if (!month) return
-
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res = await fetch(`/api/finanzas/categories?month=${encodeURIComponent(month)}`)
-        const json = await res.json()
-        setData(json)
-      } catch (err) {
-        setError("Error cargando categorías")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
+    fetch(`/api/finanzas/categories?month=${month}`)
+      .then(res => res.json())
+      .then(setData)
   }, [month])
 
+  if (!data) return null
+
+  const {
+    structuralCategories = [],
+    totalFixed = 0,
+    totalVariable = 0,
+    previousTotalFixed = 0,
+    previousTotalVariable = 0,
+  } = data
+
+  const absFixed = Math.abs(totalFixed)
+  const absVariable = Math.abs(totalVariable)
+  const structuralTotal = absFixed + absVariable
+
+  const previousTotal = Math.abs(previousTotalFixed) + Math.abs(previousTotalVariable)
+
+  const globalDelta = structuralTotal - previousTotal
+
+  const globalDeltaPct =
+    previousTotal === 0
+      ? structuralTotal > 0 ? 100 : 0
+      : (globalDelta / previousTotal) * 100
+
   const formatMoney = (value: number) =>
-    new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(Math.abs(value || 0))
+    new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 })
+      .format(Math.abs(value))
 
-  const computed = useMemo(() => {
-    if (!data) return null
+  const fixedPct = structuralTotal > 0
+    ? Math.round((absFixed / structuralTotal) * 100)
+    : 0
 
-    const {
-      structuralCategories = [],
-      totalFixed = 0,
-      totalVariable = 0,
-      previousTotalFixed = 0,
-      previousTotalVariable = 0,
-    } = data
+  const variablePct = 100 - fixedPct
 
-    const absFixed = Math.abs(totalFixed)
-    const absVariable = Math.abs(totalVariable)
-    const structuralTotal = absFixed + absVariable
+  const donutData = [
+    { name: "Fijos", value: absFixed },
+    { name: "Variables", value: absVariable },
+  ]
 
-    const previousStructuralTotal =
-      Math.abs(previousTotalFixed || 0) +
-      Math.abs(previousTotalVariable || 0)
+  const fixedCategories = structuralCategories
+    .filter(c => c.type === "fixed")
+    .sort((a,b) => Math.abs(b.total) - Math.abs(a.total))
 
-    const structuralDelta =
-      previousStructuralTotal !== 0
-        ? ((structuralTotal - previousStructuralTotal) / previousStructuralTotal) * 100
-        : 0
+  const variableCategories = structuralCategories
+    .filter(c => c.type === "variable")
+    .sort((a,b) => Math.abs(b.total) - Math.abs(a.total))
 
-    const fixedDelta =
-      previousTotalFixed !== 0
-        ? ((totalFixed - previousTotalFixed) / Math.abs(previousTotalFixed)) * 100
-        : 0
-
-    const variableDelta =
-      previousTotalVariable !== 0
-        ? ((totalVariable - previousTotalVariable) / Math.abs(previousTotalVariable)) * 100
-        : 0
-
-    const fixedPct =
-      structuralTotal > 0 ? Math.round((absFixed / structuralTotal) * 100) : 0
-
-    const variablePct = 100 - fixedPct
-
-    const structuralStatus =
-      fixedPct > 70 ? "red" :
-      fixedPct > 55 ? "yellow" :
-      "green"
-
-    const fixedCategories = structuralCategories
-      .filter(c => c.type === "fixed")
-      .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
-
-    const variableCategories = structuralCategories
-      .filter(c => c.type === "variable")
-      .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
-
-    const top3Impact = [...structuralCategories]
-      .sort((a, b) => Math.abs(b.total - (b.previousTotal || 0)) - Math.abs(a.total - (a.previousTotal || 0)))
-      .slice(0, 3)
-
-    return {
-      structuralTotal,
-      absFixed,
-      absVariable,
-      fixedPct,
-      variablePct,
-      structuralDelta,
-      fixedDelta,
-      variableDelta,
-      structuralStatus,
-      fixedCategories,
-      variableCategories,
-      top3Impact,
-    }
-  }, [data])
-
-  if (loading) return <div className="p-6 text-center">Cargando...</div>
-  if (error) return <div className="p-6 text-red-600">{error}</div>
-  if (!computed) return null
+  const navigateToTransactions = (name: string) => {
+    router.push(`/finanzas/transactions?month=${month}&category=${name}`)
+  }
 
   return (
     <div className="space-y-10">
 
-      {/* RESUMEN GLOBAL */}
+      {/* TOTAL GLOBAL */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold">
-          ${formatMoney(computed.structuralTotal)}
-        </h2>
-        <p className={`text-sm font-semibold ${
-          computed.structuralDelta >= 0 ? "text-rose-500" : "text-blue-600"
-        }`}>
-          {computed.structuralDelta >= 0 ? "↑" : "↓"} {Math.abs(computed.structuralDelta).toFixed(1)}% vs mes anterior
+        <p className="text-3xl font-bold text-gray-900">
+          ${formatMoney(structuralTotal)}
         </p>
+
+        {advanced && (
+          <p className={`text-sm font-medium ${
+            globalDelta === 0
+              ? "text-gray-500"
+              : globalDelta > 0
+              ? "text-rose-500"
+              : "text-blue-600"
+          }`}>
+            {globalDelta > 0 && "↑ "}
+            {globalDelta < 0 && "↓ "}
+            {globalDelta === 0 ? "" : `${Math.abs(globalDeltaPct).toFixed(1)}% `}
+            vs mes anterior
+          </p>
+        )}
       </div>
 
-      {/* DISTRIBUCIÓN */}
+      {/* DONUT */}
       <div className="card p-6 bg-white rounded-lg shadow">
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={[
-                  { name: "Fijos", value: computed.absFixed },
-                  { name: "Variables", value: computed.absVariable },
-                ]}
+                data={donutData}
                 dataKey="value"
                 innerRadius={60}
                 outerRadius={85}
@@ -187,46 +150,109 @@ export default function FinanzasCategories() {
         </div>
       </div>
 
-      {/* ANÁLISIS ESTRUCTURAL */}
-      <div className="max-w-md mx-auto text-center space-y-3">
-        <div className="flex justify-center gap-6 font-semibold text-sm">
-          <span className="text-rose-500">
-            Fijos: {computed.fixedPct}% ({computed.fixedDelta.toFixed(1)}%)
-          </span>
-          <span className="text-blue-600">
-            Variables: {computed.variablePct}% ({computed.variableDelta.toFixed(1)}%)
-          </span>
-        </div>
-
-        <div className={`p-4 rounded-lg text-sm ${
-          computed.structuralStatus === "red"
-            ? "bg-rose-50 text-rose-700"
-            : computed.structuralStatus === "yellow"
-            ? "bg-amber-50 text-amber-700"
-            : "bg-emerald-50 text-emerald-700"
-        }`}>
-          {computed.structuralStatus === "red" &&
-            "Alta rigidez estructural. Reduce gastos fijos."}
-          {computed.structuralStatus === "yellow" &&
-            "Estructura equilibrada con margen de optimización."}
-          {computed.structuralStatus === "green" &&
-            "Estructura flexible y saludable."}
-        </div>
+      {/* DISTRIBUCIÓN */}
+      <div className="text-center text-sm font-semibold space-x-6">
+        <span className="text-rose-500">
+          Fijos {fixedPct}%
+        </span>
+        <span className="text-blue-600">
+          Variables {variablePct}%
+        </span>
       </div>
 
-      {/* TOP IMPACTO */}
-      <div className="max-w-md mx-auto space-y-2">
-        <h3 className="text-sm font-semibold uppercase text-gray-500">
-          Categorías que explican el cambio
-        </h3>
-        {computed.top3Impact.map(cat => (
-          <div key={cat.name} className="flex justify-between text-sm">
-            <span>{cat.name}</span>
-            <span className="font-semibold">
-              ${formatMoney(cat.total - (cat.previousTotal || 0))}
-            </span>
-          </div>
-        ))}
+      {/* INSIGHT ESTRUCTURAL */}
+      {advanced && (
+        <div className="max-w-md mx-auto text-center">
+          {fixedPct > 70 && (
+            <div className="bg-rose-50 rounded-lg p-4 text-rose-700 text-sm">
+              Alta rigidez estructural. 74% del gasto es fijo.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SECCIONES OPERATIVAS */}
+      {[{
+        title: "Movimientos Fijos",
+        items: fixedCategories,
+        clusterBase: absFixed,
+        barColor: "bg-rose-400",
+      },{
+        title: "Movimientos Variables",
+        items: variableCategories,
+        clusterBase: absVariable,
+        barColor: "bg-blue-500",
+      }].map(section => (
+        <div key={section.title} className="space-y-4">
+          <h2 className="text-xl font-semibold">{section.title}</h2>
+
+          {section.items.map(cat => {
+
+            const percent = section.clusterBase > 0
+              ? (Math.abs(cat.total) / section.clusterBase) * 100
+              : 0
+
+            const previous = cat.previousTotal ?? 0
+            const delta = cat.total - previous
+
+            const deltaPct = previous === 0
+              ? cat.total > 0 ? 100 : 0
+              : (delta / previous) * 100
+
+            return (
+              <div key={cat.name}
+                className="card p-4 bg-white rounded-lg border border-gray-200 space-y-3">
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => navigateToTransactions(cat.name)}
+                    className="font-medium hover:underline"
+                  >
+                    {cat.name}
+                  </button>
+
+                  <div className="text-right">
+                    <p className="font-semibold">
+                      -${formatMoney(cat.total)}
+                    </p>
+
+                    {advanced && delta !== 0 && (
+                      <p className={`text-xs ${
+                        delta > 0 ? "text-rose-500" : "text-blue-600"
+                      }`}>
+                        {delta > 0 ? "↑" : "↓"} {Math.abs(deltaPct).toFixed(1)}%
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`${section.barColor} h-2 rounded-full`}
+                    style={{ width: `${Math.min(percent,100)}%` }}
+                  />
+                </div>
+
+                {advanced && cat.budget && cat.total !== 0 && (
+                  <div className="p-3 bg-gray-50 rounded-lg text-sm">
+                    Presupuesto ${formatMoney(cat.budget)}
+                  </div>
+                )}
+
+              </div>
+            )
+          })}
+        </div>
+      ))}
+
+      {/* TOGGLE */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setAdvanced(!advanced)}
+          className="px-4 py-2 rounded-full bg-indigo-600 text-white"
+        >
+          {advanced ? "Ocultar análisis" : "Modo análisis"}
+        </button>
       </div>
 
     </div>
