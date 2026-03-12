@@ -326,3 +326,4 @@ return (
     {loading ? "Guardando..." : "Guardar Check-in"}
   </button>
 </div>
+}
