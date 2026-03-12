@@ -1,18 +1,30 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useState, ReactNode, useEffect } from "react"
 
-interface FinanceContextValue {
+interface FinanceContextType {
   month: string
-  setMonth: (newMonth: string) => void
+  setMonth: (month: string) => void
 }
 
-const FinanceContext = createContext<FinanceContextValue | null>(null)
+const FinanceContext = createContext<FinanceContextType | null>(null)
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
-  const today = new Date().toISOString().slice(0, 7)
+  const [month, setMonth] = useState<string>("")
+  const [isHydrated, setIsHydrated] = useState(false)
 
-  const [month, setMonth] = useState<string>(today)
+  // Inicializar con el mes actual
+  useEffect(() => {
+    const today = new Date()
+    const currentMonth = today.toISOString().slice(0, 7) // Formato: YYYY-MM
+    setMonth(currentMonth)
+    setIsHydrated(true)
+  }, [])
+
+  // Evitar renderizar antes de la hidratación
+  if (!isHydrated) {
+    return <>{children}</>
+  }
 
   return (
     <FinanceContext.Provider value={{ month, setMonth }}>
@@ -21,6 +33,24 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export const useFinance = () => {
-  return useContext(FinanceContext)
+export function useFinance(): FinanceContextType | null {
+  const context = useContext(FinanceContext)
+  
+  if (!context) {
+    console.warn("useFinance debe ser usado dentro de FinanceProvider")
+    return null
+  }
+  
+  return context
+}
+
+// Hook alternativo que lanza error si no está dentro del provider
+export function useFinanceOrThrow(): FinanceContextType {
+  const context = useContext(FinanceContext)
+  
+  if (!context) {
+    throw new Error("useFinance debe ser usado dentro de FinanceProvider")
+  }
+  
+  return context
 }
