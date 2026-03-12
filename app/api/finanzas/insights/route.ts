@@ -4,18 +4,20 @@ import { financialInsightsEngine } from "@/lib/engines/financialInsightsEngine"
 export async function GET() {
   try {
     const res = await fetch("http://localhost:3000/api/finanzas/categories")
-    const data = await res.json()
+    const json = await res.json()
+
+    const categories = json?.data?.structuralCategories || []
 
     const insights = financialInsightsEngine({
-      categories: data.categories,
+      categories,
       flujo: -1, // puedes conectar flujo real luego
     })
 
-    return NextResponse.json({ insights })
+    return NextResponse.json({ success: true, data: { insights } })
 
   } catch (error) {
     return NextResponse.json(
-      { error: "Error cargando insights" },
+      { success: false, error: "Error cargando insights" },
       { status: 500 }
     )
   }

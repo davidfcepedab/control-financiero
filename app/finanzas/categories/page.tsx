@@ -31,7 +31,11 @@ interface CategoriesData {
   structuralCategories?: Category[]
   totalFixed?: number
   totalVariable?: number
-  success?: boolean
+}
+
+interface CategoriesResponse {
+  success: boolean
+  data?: CategoriesData
   error?: string
 }
 
@@ -74,13 +78,13 @@ export default function FinanzasCategories() {
           throw new Error(`Error ${response.status}: ${response.statusText}`)
         }
 
-        const json: CategoriesData = await response.json()
+        const json: CategoriesResponse = await response.json()
 
-        if (!json.success && json.error) {
-          throw new Error(json.error)
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
         }
 
-        setData(json)
+        setData(json.data ?? null)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Error desconocido"
         setError(errorMessage)

@@ -21,20 +21,24 @@ interface MonthlyRow {
   flujo: number
 }
 
-interface OverviewResponse {
+interface OverviewData {
   ingresos: number
   flujo_total: number
   liquidez: number
   runway: number
   monthlyData: MonthlyRow[]
-  success?: boolean
+}
+
+interface OverviewResponse {
+  success: boolean
+  data?: OverviewData
   error?: string
 }
 
 export default function FinanzasOverview() {
   const finance = useFinance()
 
-  const [data, setData] = useState<OverviewResponse | null>(null)
+  const [data, setData] = useState<OverviewData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -69,11 +73,11 @@ export default function FinanzasOverview() {
 
         const json: OverviewResponse = await response.json()
 
-        if (!json.success && json.error) {
-          throw new Error(json.error)
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
         }
 
-        setData(json)
+        setData(json.data ?? null)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Error desconocido"
         setError(errorMessage)

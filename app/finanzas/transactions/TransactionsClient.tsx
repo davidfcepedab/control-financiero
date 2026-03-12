@@ -10,12 +10,17 @@ interface Transaction {
   description: string
   amount: number
   category?: string
+  subcategory?: string
+}
+
+interface TransactionsData {
+  transactions: Transaction[]
+  subtotal?: number
 }
 
 interface TransactionsResponse {
-  transactions: Transaction[]
-  total?: number
-  success?: boolean
+  success: boolean
+  data?: TransactionsData
   error?: string
 }
 
@@ -23,7 +28,7 @@ export default function TransactionsClient() {
   const finance = useFinance()
   const searchParams = useSearchParams()
 
-  const [data, setData] = useState<TransactionsResponse | null>(null)
+  const [data, setData] = useState<TransactionsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -63,11 +68,11 @@ export default function TransactionsClient() {
 
         const json: TransactionsResponse = await response.json()
 
-        if (!json.success && json.error) {
-          throw new Error(json.error)
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
         }
 
-        setData(json)
+        setData(json.data ?? null)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Error desconocido"
         setError(errorMessage)
@@ -123,11 +128,11 @@ export default function TransactionsClient() {
       )}
 
       {/* Resumen */}
-      {hasTransactions && data.total !== undefined && (
+      {hasTransactions && data.subtotal !== undefined && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-gray-600">Total de movimientos</p>
           <p className="text-2xl font-bold text-blue-600">
-            ${Math.abs(data.total).toLocaleString("es-CO")}
+            ${Math.abs(data.subtotal).toLocaleString("es-CO")}
           </p>
         </div>
       )}

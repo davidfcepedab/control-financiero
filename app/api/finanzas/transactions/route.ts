@@ -32,31 +32,35 @@ export async function GET(req: NextRequest) {
       return true
     })
 
-    const transactions = filtered.map((r) => ({
-      fecha: r?.[0] || "",
-      descripcion: r?.[5] || "",
-      categoria: r?.[6] || "",
-      subcategoria: r?.[7] || "",
-      monto: Number(r?.[10] || 0),
+    const transactions = filtered.map((r, i) => ({
+      id: `${r?.[0] || ""}-${i}`,
+      date: r?.[0] || "",
+      description: r?.[5] || "",
+      category: r?.[6] || "",
+      subcategory: r?.[7] || "",
+      amount: Number(r?.[10] || 0),
     }))
 
     const subtotal = transactions.reduce(
-      (acc, tx) => acc + tx.monto,
+      (acc, tx) => acc + tx.amount,
       0
     )
 
     return NextResponse.json({
-      transactions,
-      subtotal,
-      previousSubtotal: 0,
-      delta: 0,
+      success: true,
+      data: {
+        transactions,
+        subtotal,
+        previousSubtotal: 0,
+        delta: 0,
+      },
     })
 
   } catch (error: any) {
     console.error("TRANSACTIONS ERROR:", error?.message)
 
     return NextResponse.json(
-      { error: "Error cargando transacciones", details: error?.message },
+      { success: false, error: "Error cargando transacciones" },
       { status: 500 }
     )
   }
