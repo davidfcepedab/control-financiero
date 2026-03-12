@@ -19,6 +19,11 @@ interface Category {
   name: string
   type: "fixed" | "variable"
   total: number
+  previousTotal?: number
+  delta?: number
+  budget?: number
+  budgetUsedPercent?: number
+  budgetStatus?: "green" | "yellow" | "red"
   subcategories?: Subcategory[]
 }
 
@@ -192,6 +197,26 @@ export default function FinanzasCategories() {
         </button>
       </div>
 
+      {/* TOTALS SUMMARY */}
+      <div className="flex justify-center gap-16 text-center mb-8">
+        <div>
+          <p className="text-xs uppercase text-gray-500 tracking-wide mb-1">
+            Movimientos Fijos
+          </p>
+          <p className="text-2xl font-bold text-rose-500">
+            ${formatMoney(absFixed)}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase text-gray-500 tracking-wide mb-1">
+            Movimientos Variables
+          </p>
+          <p className="text-2xl font-bold text-blue-600">
+            ${formatMoney(absVariable)}
+          </p>
+        </div>
+      </div>
+
       {/* DONUT CHART */}
       <div className="card p-6 bg-white rounded-lg shadow">
         <div className="h-64">
@@ -218,8 +243,8 @@ export default function FinanzasCategories() {
 
       {/* ANÁLISIS AVANZADO */}
       {advanced && (
-        <div className="card p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
-          <div className="flex justify-center gap-8 font-semibold text-sm">
+        <div className="max-w-md mx-auto space-y-3 text-center mb-8">
+          <div className="flex justify-center gap-10 font-semibold text-sm">
             <span className="text-rose-500">
               Fijos: {fixedPct}%
             </span>
@@ -229,20 +254,20 @@ export default function FinanzasCategories() {
           </div>
 
           {fixedPct > 70 && (
-            <div className="p-3 bg-rose-100 border border-rose-300 rounded text-rose-700 text-sm">
-              ⚠️ <strong>Alta rigidez estructural.</strong> El gasto fijo limita tu flexibilidad financiera.
+            <div className="bg-rose-50 rounded-lg p-4 text-rose-700 text-sm leading-relaxed">
+              <strong>Alta rigidez estructural.</strong> El gasto fijo limita tu flexibilidad financiera.
             </div>
           )}
 
           {fixedPct <= 70 && fixedPct > 50 && (
-            <div className="p-3 bg-amber-100 border border-amber-300 rounded text-amber-700 text-sm">
-              ⚡ <strong>Estructura equilibrada.</strong> Monitorea los gastos fijos.
+            <div className="bg-amber-50 rounded-lg p-4 text-amber-700 text-sm leading-relaxed">
+              <strong>Estructura equilibrada.</strong> Mantén control sobre tus gastos fijos.
             </div>
           )}
 
           {fixedPct <= 50 && (
-            <div className="p-3 bg-green-100 border border-green-300 rounded text-green-700 text-sm">
-              ✓ <strong>Buena flexibilidad estructural.</strong> Tienes control sobre tus gastos.
+            <div className="bg-blue-50 rounded-lg p-4 text-blue-700 text-sm leading-relaxed">
+              <strong>Excelente flexibilidad estructural.</strong> Tu distribución de gastos te permite adaptarte.
             </div>
           )}
         </div>
@@ -286,6 +311,18 @@ export default function FinanzasCategories() {
                   Array.isArray(cat.subcategories) &&
                   cat.subcategories.length > 0
 
+                // Delta comparison
+                const hasDelta = cat.delta !== undefined && cat.delta !== 0
+                const isDeltaNegative = hasDelta && cat.delta < 0
+                const deltaPercent = hasDelta
+                  ? Math.abs(((Math.abs(cat.delta) / Math.abs(cat.total - (cat.delta || 0))) * 100).toFixed(1))
+                  : 0
+
+                // Budget
+                const hasBudget = cat.budget !== undefined && cat.budget > 0
+                const budgetPercent = cat.budgetUsedPercent ?? 0
+                const budgetStatus = cat.budgetStatus ?? "green"
+
                 return (
                   <div
                     key={cat.name}
@@ -309,14 +346,30 @@ export default function FinanzasCategories() {
                         )}
                       </button>
 
-                      {/* MONTO - CLICKEABLE */}
-                      <button
-                        onClick={() => navigateToTransactions(cat.name)}
-                        className="font-semibold text-gray-900 hover:text-blue-600 hover:underline transition whitespace-nowrap"
-                        title="Ver transacciones de esta categoría"
-                      >
-                        -${formatMoney(cat.total)}
-                      </button>
+                      {/* MONTO + DELTA */}
+                      <div className="flex flex-col items-end gap-0.5">
+                        <button
+                          onClick={() => navigateToTransactions(cat.name)}
+                          className="font-semibold text-gray-900 hover:text-blue-600 hover:underline transition whitespace-nowrap cursor-pointer"
+                          title="Ver transacciones de esta categoría"
+                        >
+                          -${formatMoney(cat.total)}
+                        </button>
+
+                        {/* DELTA INDICATOR */}
+                        {hasDelta && (
+                          <span
+                            className={`text-xs font-medium ${
+                              isDeltaNegative
+                                ? "text-blue-600"
+                                : "text-rose-500"
+                            }`}
+                            title="Comparado con mes anterior"
+                          >
+                            {isDeltaNegative ? "↓" : "↑"} {deltaPercent}%
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* BARRA DE PROGRESO */}
@@ -331,6 +384,63 @@ export default function FinanzasCategories() {
                       />
                     </div>
 
+                    {/* PRESUPUESTO - SOLO EN MODO AVANZADO */}
+                    {advanced && hasBudget && (
+                      <div
+                        className={`p-3 rounded-lg space-y-2 border ${
+                          budgetStatus === "red"
+                            ? "bg-rose-50 border-rose-200"
+                            : budgetStatus === "yellow"
+                            ? "bg-amber-50 border-amber-200"
+                            : "bg-emerald-50 border-emerald-200"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="font-medium text-gray-700">Presupuesto</span>
+                          <span
+                            className={`font-semibold ${
+                              budgetStatus === "red"
+                                ? "text-rose-600"
+                                : budgetStatus === "yellow"
+                                ? "text-amber-600"
+                                : "text-emerald-600"
+                            }`
+                          >
+                            ${formatMoney(cat.budget || 0)}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-gray-600">Uso</span>
+                          <span
+                            className={`font-semibold ${
+                              budgetStatus === "red"
+                                ? "text-rose-600"
+                                : budgetStatus === "yellow"
+                                ? "text-amber-600"
+                                : "text-emerald-600"
+                            }`
+                          >
+                            {Math.round(budgetPercent)}%
+                            {budgetStatus === "red" && " ⚠️"}
+                          </span>
+                        </div>
+
+                        <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              budgetStatus === "red"
+                                ? "bg-rose-500"
+                                : budgetStatus === "yellow"
+                                ? "bg-amber-500"
+                                : "bg-emerald-500"
+                            }`}
+                            style={{ width: `${Math.min(budgetPercent, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+
                     {/* SUBCATEGORÍAS */}
                     {expanded === cat.name && hasSubcategories && (
                       <div className="mt-4 space-y-2 border-t border-gray-200 pt-3">
@@ -338,15 +448,22 @@ export default function FinanzasCategories() {
                           Subcategorías
                         </p>
                         {cat.subcategories!.map((sub) => (
-                          <div
+                          <button
                             key={sub.name}
-                            className="flex justify-between text-sm text-gray-600 hover:text-gray-900 transition"
+                            onClick={() => {
+                              if (!month) return
+                              router.push(
+                                `/finanzas/transactions?month=${encodeURIComponent(month)}&category=${encodeURIComponent(cat.name)}&subcategory=${encodeURIComponent(sub.name)}`
+                              )
+                            }}
+                            className="w-full flex justify-between text-sm text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition cursor-pointer py-1 px-2 rounded"
+                            title="Ver transacciones de esta subcategoría"
                           >
                             <span>• {sub.name}</span>
                             <span className="font-medium">
                               -${formatMoney(sub.total)}
                             </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}
