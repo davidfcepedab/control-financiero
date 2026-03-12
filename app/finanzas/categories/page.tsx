@@ -106,17 +106,17 @@ export default function FinanzasCategories() {
       {/* BOTÓN MODO ANÁLISIS */}
       {/* ================= */}
       <div className="flex justify-end">
-        <button
-          onClick={() => setAdvanced(!advanced)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-            advanced
-              ? "bg-indigo-600 text-white"
-              : "bg-gray-200 text-gray-700"
-          }`}
-        >
-          {advanced ? "✓ Modo análisis" : "Modo análisis"}
-        </button>
-      </div>
+  <button
+    onClick={() => setAdvanced(!advanced)}
+    className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+      advanced
+        ? "bg-indigo-600 text-white"
+        : "bg-gray-200 text-gray-700"
+    }`}
+  >
+    {advanced ? "✓ Análisis activo" : "Modo análisis"}
+  </button>
+</div>
 
       {/* ================= */}
       {/* BLOQUE SUPERIOR  */}
@@ -143,6 +143,26 @@ export default function FinanzasCategories() {
             : `${Math.abs(globalDeltaPct).toFixed(1)}% vs mes anterior`}
         </p>
       </div>
+
+      {advanced && (
+  <div className="max-w-md mx-auto text-center mt-4">
+    {fixedPct > 70 && (
+      <div className="bg-rose-50 rounded-lg p-4 text-rose-700 text-sm">
+        Alta rigidez estructural. {fixedPct}% del gasto es fijo.
+      </div>
+    )}
+    {fixedPct <= 70 && fixedPct > 50 && (
+      <div className="bg-amber-50 rounded-lg p-4 text-amber-700 text-sm">
+        Estructura equilibrada.
+      </div>
+    )}
+    {fixedPct <= 50 && (
+      <div className="bg-blue-50 rounded-lg p-4 text-blue-700 text-sm">
+        Buena flexibilidad estructural.
+      </div>
+    )}
+  </div>
+)}
 
       {/* ================= */}
       {/* SECCIONES         */}
@@ -206,33 +226,43 @@ export default function FinanzasCategories() {
                 {/* HEADER */}
                 <div className="flex justify-between items-center gap-4">
 
-                  <button
-                    onClick={() => toggleCategory(cat.name)}
-                    className="flex items-center gap-2 text-left"
-                  >
-                    <span className="font-medium">
-                      {cat.name}
-                    </span>
+  <button
+    onClick={() => toggleCategory(cat.name)}
+    className="flex items-center gap-2 text-left"
+  >
+    <span className="font-medium">{cat.name}</span>
+    {hasSubcategories && (
+      <span className="text-sm">
+        {expanded === cat.name ? "▲" : "▼"}
+      </span>
+    )}
+  </button>
 
-                    {hasSubcategories && (
-                      <span
-                        className={`text-sm transition-transform ${
-                          expanded === cat.name ? "rotate-180" : ""
-                        }`}
-                      >
-                        ▼
-                      </span>
-                    )}
-                  </button>
+  <div className="text-right">
+    <button
+      onClick={() => navigateToTransactions(cat.name)}
+      className="font-semibold hover:text-blue-600 hover:underline"
+    >
+      -${formatMoney(cat.total)}
+    </button>
 
-                  <button
-                    onClick={() => navigateToTransactions(cat.name)}
-                    className="font-semibold hover:text-blue-600 hover:underline"
-                  >
-                    -${formatMoney(cat.total)}
-                  </button>
+    {advanced && cat.previousTotal !== undefined && (
+      <div className={`text-xs ${
+        cat.total - cat.previousTotal > 0
+          ? "text-rose-500"
+          : "text-blue-600"
+      }`}>
+        {(cat.total - cat.previousTotal) > 0 ? "↑" : "↓"}{" "}
+        {Math.abs(
+          ((cat.total - cat.previousTotal) /
+            (cat.previousTotal || 1)) *
+            100
+        ).toFixed(1)}%
+      </div>
+    )}
+  </div>
 
-                </div>
+</div>
 
                 {/* DELTA (solo análisis) */}
                 {advanced && delta !== 0 && (
