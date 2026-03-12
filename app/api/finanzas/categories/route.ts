@@ -56,11 +56,12 @@ export async function GET(req: NextRequest) {
     })
 
     return NextResponse.json({
-      ...structural,
-      structuralCategories: structuralWithBudget,
-      insight,
-      prediction,
-    })
+  VERSION: "INSIGHT_V2_ACTIVA",
+  ...structural,
+  structuralCategories: structuralWithBudget,
+  insight,
+  prediction,
+})
 
   } catch (error: any) {
     console.error("CATEGORIES ERROR:", error?.message)
