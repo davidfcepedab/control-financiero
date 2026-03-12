@@ -18,11 +18,14 @@
     "recharts": "^3.8.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "25.3.3",
     "@types/react": "18.3.3",
     "autoprefixer": "10.4.19",
+    "jest": "^30.3.0",
     "postcss": "8.4.38",
     "tailwindcss": "3.4.4",
+    "ts-jest": "^29.4.6",
     "typescript": "5.4.5"
   }
 }
