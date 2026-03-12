@@ -8,9 +8,12 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import { useRouter } from "next/navigation"
 
 export default function FinanzasCategories() {
   const { month } = useFinance()
+  const router = useRouter()
+
   const [data, setData] = useState<any>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [advanced, setAdvanced] = useState(false)
@@ -107,9 +110,7 @@ export default function FinanzasCategories() {
       {/* TOGGLE */}
       <div className="flex justify-end">
         <label className="flex items-center gap-2 text-sm cursor-pointer">
-          <span className="text-gray-500">
-            Modo análisis
-          </span>
+          <span className="text-gray-500">Modo análisis</span>
           <div
             onClick={() => setAdvanced(!advanced)}
             className={`w-10 h-5 flex items-center rounded-full p-1 transition ${
@@ -129,11 +130,8 @@ export default function FinanzasCategories() {
       <div className="card p-4 text-sm space-y-2">
         <div className="flex justify-between">
           <span>Rigidez estructural</span>
-          <span className={rigidezColor}>
-            {fixedPct}%
-          </span>
+          <span className={rigidezColor}>{fixedPct}%</span>
         </div>
-
         <div className="flex justify-between">
           <span>Presión presupuestal</span>
           <span className={presionColor}>
@@ -150,7 +148,6 @@ export default function FinanzasCategories() {
             -${formatMoney(totalFixed)}
           </p>
         </div>
-
         <div className="card p-6 text-center">
           <p className="text-sm text-gray-500">Variables</p>
           <p className="text-2xl font-semibold text-blue-600 mt-2">
@@ -207,7 +204,6 @@ export default function FinanzasCategories() {
         barColor: "bg-blue-500"
       }].map((section) => (
         <div key={section.title} className="space-y-4">
-
           <h2 className="text-xl font-semibold">
             {section.title}
           </h2>
@@ -230,19 +226,28 @@ export default function FinanzasCategories() {
                 key={cat.name}
                 className="card p-4 transition-all duration-200"
               >
-                <div
-                  className="flex justify-between items-center cursor-pointer"
-                  onClick={() =>
-                    handleClickCategory(cat.name)
-                  }
-                >
-                  <p className="font-medium flex items-center gap-2">
+                <div className="flex justify-between items-center">
+                  <p
+                    className="font-medium flex items-center gap-2 cursor-pointer"
+                    onClick={() =>
+                      handleClickCategory(cat.name)
+                    }
+                  >
                     {cat.name}
                     <span className="text-xs text-gray-400">
                       {expanded === cat.name ? "▴" : "▾"}
                     </span>
                   </p>
-                  <p className="font-semibold">
+
+                  <p
+                    className="font-semibold cursor-pointer hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      router.push(
+                        `/finanzas/movimientos?month=${month}&category=${cat.name}`
+                      )
+                    }}
+                  >
                     -${formatMoney(cat.total)}
                   </p>
                 </div>
@@ -326,42 +331,6 @@ export default function FinanzasCategories() {
           })}
         </div>
       ))}
-
-      {/* HEATMAP */}
-      {advanced && (
-        <div className="card p-6">
-          <h3 className="text-sm text-gray-500 mb-4">
-            Intensidad estructural 6 meses
-          </h3>
-
-          <div className="space-y-3">
-            {data.heatmap6m?.map((row: any) => (
-              <div key={row.name} className="flex items-center gap-3">
-                <div className="w-28 text-xs text-gray-600">
-                  {row.name}
-                </div>
-
-                <div className="flex gap-1 flex-1">
-                  {row.months.map((m: any) => {
-                    let bg = "bg-blue-200"
-                    if (m.percent > 100) bg = "bg-red-300"
-                    else if (m.percent > 80) bg = "bg-yellow-300"
-
-                    return (
-                      <div
-                        key={m.month}
-                        className={`h-6 flex-1 rounded ${bg}`}
-                        title={`${m.month} - ${m.percent}%`}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
     </div>
   )
 }
