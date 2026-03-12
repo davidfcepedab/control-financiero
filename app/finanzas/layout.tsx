@@ -1,91 +1,47 @@
 "use client"
 
-import { ReactNode } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { FinanceProvider, useFinance } from "./FinanceContext"
+import { useEffect, useState } from "react"
+import { useFinance } from "../FinanceContext"
+import { useSearchParams } from "next/navigation"
 
-function FinanzasLayoutContent({
-  children,
-}: {
-  children: ReactNode
-}) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const { month, setMonth } = useFinance()
+export default function TransactionsClient() {
+  const { month } = useFinance()
+  const searchParams = useSearchParams()
 
-  const tabs = [
-    { name: "Overview", path: "/finanzas/overview" },
-    { name: "Movimientos", path: "/finanzas/transactions" },
-    { name: "Categorías", path: "/finanzas/categories" },
-    { name: "Insights", path: "/finanzas/insights" },
-  ]
+  const categoryFilter = searchParams.get("category")
+
+  const [data, setData] = useState<any>(null)
+
+  useEffect(() => {
+    if (!month) return
+
+    let url = `/api/finanzas/transactions?month=${month}`
+
+    if (categoryFilter) {
+      url += `&category=${encodeURIComponent(categoryFilter)}`
+    }
+
+    fetch(url)
+      .then(res => res.json())
+      .then(setData)
+
+  }, [month, categoryFilter])
+
+  if (!data) return null
 
   return (
     <div className="space-y-6">
 
-      {/* HEADER VERDE */}
-      <div
-        className="rounded-3xl p-6 text-white"
-        style={{
-          background:
-            "linear-gradient(135deg, #9BE9C0 0%, #6EE7B7 100%)",
-        }}
-      >
-        <p className="text-xs uppercase opacity-70">
-          Finanzas
-        </p>
-
-        <p className="text-2xl font-semibold mt-2">
-          Control Estratégico
-        </p>
-
-        {/* SELECTOR GLOBAL MES */}
-        <div className="mt-4">
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="px-4 py-2 rounded-xl text-black"
-          />
+      {/* Breadcrumb cuando hay filtro */}
+      {categoryFilter && (
+        <div className="text-sm text-gray-500">
+          Categorías &gt; <span className="font-medium">{categoryFilter}</span>
         </div>
-      </div>
+      )}
 
-      {/* TABS */}
-      <div className="flex gap-3 overflow-x-auto">
-        {tabs.map((tab) => {
-          const active = pathname === tab.path
+      {/* Renderiza aquí tu tabla/lista de movimientos */}
+      {/* data.transactions.map(...) */}
 
-          return (
-            <button
-              key={tab.name}
-              onClick={() => router.push(tab.path)}
-              className={`px-4 py-2 rounded-full text-sm transition ${
-                active
-                  ? "bg-white shadow text-[#166534]"
-                  : "bg-white/40 text-[#166534]"
-              }`}
-            >
-              {tab.name}
-            </button>
-          )
-        })}
-      </div>
-
-      {children}
     </div>
-  )
-}
-
-export default function FinanzasLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
-  return (
-    <FinanceProvider>
-      <FinanzasLayoutContent>
-        {children}
-      </FinanzasLayoutContent>
-    </FinanceProvider>
   )
 }
