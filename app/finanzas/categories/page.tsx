@@ -312,11 +312,11 @@ export default function FinanzasCategories() {
                   cat.subcategories.length > 0
 
                 // Delta comparison
-                const hasDelta = cat.delta !== undefined && cat.delta !== 0
-                const isDeltaNegative = hasDelta && cat.delta < 0
-                const deltaPercent = hasDelta
-                  ? Math.abs(((Math.abs(cat.delta) / Math.abs(cat.total - (cat.delta || 0))) * 100).toFixed(1))
-                  : 0
+              const hasDelta = cat.delta !== undefined && cat.delta !== 0
+                const isDeltaNegative = hasDelta && (cat.delta ?? 0) < 0
+                  const deltaPercent = hasDelta
+                    ? Math.abs(((Math.abs(cat.delta ?? 0) / Math.abs(cat.total - (cat.delta ?? 0))) * 100).toFixed(1))
+                    : 0
 
                 // Budget
                 const hasBudget = cat.budget !== undefined && cat.budget > 0
