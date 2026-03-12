@@ -304,12 +304,15 @@ response.
 ### 3.4 No `fetch("localhost")` between routes
 Routes must not make HTTP calls to sibling routes via `http://localhost:PORT/api/…`.
 Shared computation must be extracted into engines under `lib/` and imported directly.
-The current `insights` route is the one known exception and should be migrated.
 
 ### 3.5 Raw row index access (`row[NUMBER]`) restricted to `lib/`
 Spreadsheet row access by numeric index (e.g. `row[6]`, `row[12]`) may only appear inside
 files under `lib/engines/` or `lib/mappers/`. Route files in `app/api/` must receive
 already-mapped objects from these libraries.
+
+The current `/api/finanzas/overview` route is a known exception that still performs limited
+direct `row[NUMBER]` access and must be migrated to use engines/mappers before any new
+functionality is added.
 
 ---
 

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
+import {
+  filterTransactionRows,
+  mapRowToTransaction,
+} from "@/lib/mappers/transaction.mapper"
 
 const SPREADSHEET_ID = "1fEP_Em30-BTUhmeObzAE9zObQRc7CNkYXbVCecpCHO0"
 
@@ -21,25 +25,9 @@ export async function GET(req: NextRequest) {
 
     const rows = movimientosRes.data.values || []
 
-    const filtered = rows.filter((r) => {
-      const rowMonth = r?.[12]
-      const rowCategory = r?.[6]
+    const filtered = filterTransactionRows(rows, month, category)
 
-      if (!rowMonth) return false
-      if (rowMonth !== month) return false
-      if (category && rowCategory !== category) return false
-
-      return true
-    })
-
-    const transactions = filtered.map((r, i) => ({
-      id: `${r?.[0] || ""}-${i}`,
-      date: r?.[0] || "",
-      description: r?.[5] || "",
-      category: r?.[6] || "",
-      subcategory: r?.[7] || "",
-      amount: Number(r?.[10] || 0),
-    }))
+    const transactions = filtered.map(mapRowToTransaction)
 
     const subtotal = transactions.reduce(
       (acc, tx) => acc + tx.amount,
