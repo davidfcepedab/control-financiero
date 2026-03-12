@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useFinance } from "../FinanceContext"
+import { useFinance } from "./FinanceContext"
 import { useSearchParams } from "next/navigation"
 
 export default function TransactionsClient() {
