@@ -6,12 +6,11 @@ import { useSearchParams } from "next/navigation"
 
 export default function TransactionsClient() {
   const finance = useFinance()
+  const searchParams = useSearchParams()
 
-  // Protección cuando context es null (SSR / build)
   if (!finance) return null
 
   const { month } = finance
-  const searchParams = useSearchParams()
   const categoryFilter = searchParams.get("category")
 
   const [data, setData] = useState<any>(null)
@@ -36,19 +35,19 @@ export default function TransactionsClient() {
   return (
     <div className="space-y-6">
 
-      {/* Breadcrumb cuando hay filtro */}
       {categoryFilter && (
         <div className="text-sm text-gray-500">
           Categorías &gt; <span className="font-medium">{categoryFilter}</span>
         </div>
       )}
 
-      {/* Renderiza aquí tu tabla/lista de movimientos */}
-      {/* Ejemplo simple (adapta según tu table): */}
       {data.transactions?.length > 0 ? (
         <div className="space-y-4">
           {data.transactions.map((tx: any) => (
-            <div key={tx.id} className="flex justify-between p-2 border rounded">
+            <div
+              key={tx.id}
+              className="flex justify-between p-2 border rounded"
+            >
               <span>{tx.date}</span>
               <span>{tx.description}</span>
               <span className="font-semibold">
@@ -59,7 +58,7 @@ export default function TransactionsClient() {
         </div>
       ) : (
         <p className="text-sm text-gray-500">
-          No hay movimientos para este filtro/mes.
+          No hay movimientos para este mes.
         </p>
       )}
 
