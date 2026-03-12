@@ -59,12 +59,10 @@ export default function FinanzasCategories() {
   const variablePct =
     structuralTotal > 0 ? 100 - fixedPct : 0
 
-  const rigidez = fixedPct
-
   const rigidezColor =
-    rigidez > 75
+    fixedPct > 75
       ? "text-rose-500"
-      : rigidez > 60
+      : fixedPct > 60
       ? "text-amber-500"
       : "text-blue-600"
 
@@ -106,7 +104,7 @@ export default function FinanzasCategories() {
   return (
     <div className="space-y-8">
 
-      {/* ===== TOGGLE ANALISIS ===== */}
+      {/* TOGGLE */}
       <div className="flex justify-end">
         <label className="flex items-center gap-2 text-sm cursor-pointer">
           <span className="text-gray-500">
@@ -127,12 +125,12 @@ export default function FinanzasCategories() {
         </label>
       </div>
 
-      {/* ===== INDICES ===== */}
+      {/* INDICES */}
       <div className="card p-4 text-sm space-y-2">
         <div className="flex justify-between">
           <span>Rigidez estructural</span>
           <span className={rigidezColor}>
-            {rigidez}%
+            {fixedPct}%
           </span>
         </div>
 
@@ -144,7 +142,7 @@ export default function FinanzasCategories() {
         </div>
       </div>
 
-      {/* ===== TOTALES ===== */}
+      {/* TOTALES */}
       <div className="grid grid-cols-2 gap-4">
         <div className="card p-6 text-center">
           <p className="text-sm text-gray-500">Fijos</p>
@@ -161,7 +159,7 @@ export default function FinanzasCategories() {
         </div>
       </div>
 
-      {/* ===== DONUT ===== */}
+      {/* DONUT */}
       <div className="card p-6">
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
@@ -188,27 +186,14 @@ export default function FinanzasCategories() {
 
         {advanced && (
           <div className="mt-3 text-sm text-gray-500 text-center">
-            {fixedPct > 70 && (
-              <span>
-                Alta rigidez estructural. 
-                El gasto fijo limita flexibilidad.
-              </span>
-            )}
-            {fixedPct <= 70 && fixedPct > 50 && (
-              <span>
-                Estructura equilibrada, monitorear.
-              </span>
-            )}
-            {fixedPct <= 50 && (
-              <span>
-                Buena flexibilidad estructural.
-              </span>
-            )}
+            {fixedPct > 70 && "Alta rigidez estructural."}
+            {fixedPct <= 70 && fixedPct > 50 && "Estructura equilibrada."}
+            {fixedPct <= 50 && "Buena flexibilidad estructural."}
           </div>
         )}
       </div>
 
-      {/* ===== SECCIONES ===== */}
+      {/* SECCIONES */}
       {[{
         title: "Movimientos Fijos",
         items: fixedCategories,
@@ -271,10 +256,7 @@ export default function FinanzasCategories() {
 
                 {advanced && (
                   <div className="flex justify-between text-xs mt-2">
-                    <span>
-                      {percent.toFixed(1)}% del cluster
-                    </span>
-
+                    <span>{percent.toFixed(1)}%</span>
                     <span
                       className={
                         delta > 0
@@ -290,8 +272,7 @@ export default function FinanzasCategories() {
 
                 {advanced && cat.budget > 0 && (
                   <div className="mt-3 text-xs text-gray-500">
-                    Presupuesto: $
-                    {formatMoney(cat.budget)}{" "}
+                    Presupuesto: ${formatMoney(cat.budget)}
                     <div>
                       {budgetUsed.toFixed(0)}% usado
                     </div>
@@ -317,19 +298,11 @@ export default function FinanzasCategories() {
                               : 0
 
                           return (
-                            <div
-                              key={sub.name}
-                              className="text-xs"
-                            >
+                            <div key={sub.name} className="text-xs">
                               <div className="flex justify-between text-gray-500">
+                                <span>• {sub.name}</span>
                                 <span>
-                                  • {sub.name}
-                                </span>
-                                <span>
-                                  -$
-                                  {formatMoney(
-                                    sub.total
-                                  )}
+                                  -${formatMoney(sub.total)}
                                 </span>
                               </div>
 
@@ -354,7 +327,7 @@ export default function FinanzasCategories() {
         </div>
       ))}
 
-      {/* ===== HEATMAP ===== */}
+      {/* HEATMAP */}
       {advanced && (
         <div className="card p-6">
           <h3 className="text-sm text-gray-500 mb-4">
