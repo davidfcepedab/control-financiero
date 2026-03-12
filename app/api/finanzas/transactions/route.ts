@@ -12,6 +12,9 @@ export async function GET(req: NextRequest) {
     const category =
       req.nextUrl.searchParams.get("category")
 
+    const subcategory =
+      req.nextUrl.searchParams.get("subcategory")
+
     const movimientosRes =
       await sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
@@ -24,10 +27,12 @@ export async function GET(req: NextRequest) {
     const filtered = rows.filter((r) => {
       const rowMonth = r?.[12]
       const rowCategory = r?.[6]
+      const rowSubcategory = r?.[7]
 
       if (!rowMonth) return false
       if (rowMonth !== month) return false
       if (category && rowCategory !== category) return false
+      if (subcategory && rowSubcategory !== subcategory) return false
 
       return true
     })
@@ -56,7 +61,10 @@ export async function GET(req: NextRequest) {
     console.error("TRANSACTIONS ERROR:", error?.message)
 
     return NextResponse.json(
-      { error: "Error cargando transacciones", details: error?.message },
+      {
+        error: "Error cargando transacciones",
+        details: error?.message || "unknown error",
+      },
       { status: 500 }
     )
   }
