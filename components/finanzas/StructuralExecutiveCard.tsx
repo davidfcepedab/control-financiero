@@ -9,7 +9,6 @@ interface Props {
   totalVariable: number
   fixedCategoriesCount: number
   variableCategoriesCount: number
-  month?: string
 }
 
 export default function StructuralExecutiveCard({
@@ -18,7 +17,6 @@ export default function StructuralExecutiveCard({
   totalVariable,
   fixedCategoriesCount,
   variableCategoriesCount,
-  month,
 }: Props) {
   const metricas = calcularMetricasEstructurales(
     totalStructural,
