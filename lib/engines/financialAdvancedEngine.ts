@@ -83,15 +83,16 @@ export function financialAdvancedEngine({
         total: value,
       }))
 
-      return {
-        name,
-        total: data.total,
-        previousTotal,
-        delta,
-        type: (FIXED_CATEGORIES.includes(name) ? "fixed" : "variable") as "fixed" | "variable",
-        subs,
-      }
-    })
+    return {
+  name,
+  total: data.total,
+  previousTotal,
+  delta,
+  type: (FIXED_CATEGORIES.includes(name) ? "fixed" : "variable") as "fixed" | "variable",
+  subcategories: subs,  // Cambió de 'subs' a 'subcategories'
+}
+
+    
     .filter((c) => Math.abs(c.total) > 0)
 
   const financialCategories = Object.entries(financialMap).map(
