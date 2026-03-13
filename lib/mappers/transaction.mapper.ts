@@ -1,34 +1,114 @@
 import type { Transaction } from "@/lib/types"
 
+// Column indices from Movimientos sheet (A2:U5000)
+const TX_COL_FECHA = 0
+const TX_COL_DESCRIPCION = 5
+const TX_COL_CATEGORIA = 6
+const TX_COL_SUBCATEGORIA = 7
+const TX_COL_MONTO = 10
+
 /**
- * Filters raw Movimientos rows by month (col 12) and optional category (col 6).
- * All numeric column references are centralised here so route files stay index-free.
+ * Maps a raw row from the Movimientos sheet to a typed Transaction.
+ * Extracts: fecha, descripcion, categoria, subcategoria, monto, mes (derived)
+ */
+export function mapRowToTransaction(row: any[]): Transaction {
+  const fecha = row?.[TX_COL_FECHA] || ""
+  
+  // Derivar mes del fecha (formato: YYYY-MM-DD -> YYYY-MM)
+  const mes = typeof fecha === "string" && fecha.length >= 7 
+    ? fecha.substring(0, 7) 
+    : ""
+
+  return {
+    fecha,
+    descripcion: row?.[TX_COL_DESCRIPCION] || "",
+    categoria: row?.[TX_COL_CATEGORIA] || "",
+    subcategoria: row?.[TX_COL_SUBCATEGORIA] || "",
+    monto: Number(row?.[TX_COL_MONTO] ?? 0),
+    mes, // Agregar esta propiedad que faltaba
+  }
+}
+
+/**
+ * Filters transaction rows for a specific month and optional category
  */
 export function filterTransactionRows(
-  rows: any[][],
+  rows: any[],
   month: string,
-  category?: string | null
-): any[][] {
-  return rows.filter((r) => {
-    const rowMonth = r?.[12]
-    const rowCategory = r?.[6]
-    if (!rowMonth) return false
-    if (rowMonth !== month) return false
-    if (category && rowCategory !== category) return false
-    return true
+  category?: string
+): any[] {
+  return rows.filter((row) => {
+    const tx = mapRowToTransaction(row)
+    const matchesMonth = tx.mes === month
+    const matchesCategory = !category || tx.categoria === category
+    return matchesMonth && matchesCategory
   })
 }
 
 /**
- * Maps a single raw Movimientos row to a typed Transaction object.
- * Column positions: [0] date/fecha, [5] description/descripcion, [6] category/categoria, [7] subcategory/subcategoria, [10] amount/monto.
+ * Maps a raw row to a Transaction for category aggregation.
+ * Delegates to mapRowToTransaction — column indices are defined there.
  */
-export function mapRowToTransaction(row: any[]): Transaction {
+export function mapRowToCategoryAggregation(row: any[]): Transaction {
+  return mapRowToTransaction(row)
+}
+
+// ============================================================
+// Base mensual CFO sheet (Base mensual CFO!A2:H1000)
+// ============================================================
+const CFO_COL_MES = 0
+const CFO_COL_INGRESOS = 1
+const CFO_COL_GASTO_OPERATIVO = 2
+const CFO_COL_GASTO_FINANCIERO = 3
+const CFO_COL_FLUJO_TOTAL = 6
+
+/**
+ * Returns true if the raw CFO row has enough data to be usable.
+ * Keeps row-level validation inside the mapper module.
+ */
+export function isValidCFORow(row: any[]): boolean {
+  return Array.isArray(row) && row.length > 6 && !isNaN(Number(row[CFO_COL_INGRESOS]))
+}
+
+/**
+ * Maps a raw row from "Base mensual CFO" to a typed CFOMonthlyRow.
+ */
+export function mapRowToCFOMonthly(row: any[]) {
   return {
-    fecha: row?.[0] || "",
-    descripcion: row?.[5] || "",
-    categoria: row?.[6] || "",
-    subcategoria: row?.[7] || "",
-    monto: Number(row?.[10] || 0),
+    mes: String(row[CFO_COL_MES] ?? ""),
+    ingresos: Number(row[CFO_COL_INGRESOS] ?? 0),
+    gastoOperativo: Number(row[CFO_COL_GASTO_OPERATIVO] ?? 0),
+    gastoFinanciero: Number(row[CFO_COL_GASTO_FINANCIERO] ?? 0),
+    flujoTotal: Number(row[CFO_COL_FLUJO_TOTAL] ?? 0),
+  }
+}
+
+// ============================================================
+// Cuentas sheet (Cuentas!A2:J200)
+// ============================================================
+const CUENTA_COL_DISPONIBLE = 5
+
+/**
+ * Maps a raw row from the "Cuentas" sheet to a typed CuentaRow.
+ */
+export function mapRowToCuenta(row: any[]) {
+  return {
+    disponible: Number(row[CUENTA_COL_DISPONIBLE] ?? 0),
+  }
+}
+
+// ============================================================
+// Presupuesto sheet (Presupuesto!A2:C200)
+// ============================================================
+const PRESUPUESTO_COL_CATEGORIA = 0
+const PRESUPUESTO_COL_MONTO = 2
+
+/**
+ * Maps a raw row from the "Presupuesto" sheet to a typed BudgetRow.
+ */
+export function mapRowToBudget(row: any[]) {
+  return {
+    categoria: String(row[PRESUPUESTO_COL_CATEGORIA] ?? ""),
+    monto: Number(row[PRESUPUESTO_COL_MONTO] ?? 0),
   }
 }
