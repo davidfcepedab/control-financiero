@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     const transactions = filtered.map(mapRowToTransaction)
 
     const subtotal = transactions.reduce(
-      (acc, tx) => acc + tx.amount,
+      (acc, tx) => acc + tx.monto,
       0
     )
 
