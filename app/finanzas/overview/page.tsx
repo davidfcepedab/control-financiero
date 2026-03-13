@@ -43,8 +43,6 @@ export default function FinanzasOverview() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const month = finance?.month
-
   useEffect(() => {
     if (!month) {
       setData(null)

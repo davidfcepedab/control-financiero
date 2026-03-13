@@ -1,18 +1,28 @@
 import type { Transaction, CFOMonthlyRow, CuentaRow, BudgetRow } from "@/lib/types"
-import { mapRowToTransaction } from "@/lib/mappers/transaction.mapper"
 
 // ============================================================
 // Movimientos sheet — category-focused projection
-// Delegates to mapRowToTransaction to avoid duplicating column
-// indices. Use this in the /categories API route.
 // ============================================================
+
+const MOV_COL_FECHA = 0
+const MOV_COL_DESCRIPCION = 5
+const MOV_COL_CATEGORIA = 6
+const MOV_COL_SUBCATEGORIA = 7
+const MOV_COL_MONTO = 10
+const MOV_COL_MES = 12
 
 /**
  * Maps a raw Movimientos row to a Transaction for category aggregation.
- * Delegates to mapRowToTransaction — column indices are defined there.
  */
 export function mapRowToCategoryAggregation(row: any[]): Transaction {
-  return mapRowToTransaction(row)
+  return {
+    fecha: String(row[MOV_COL_FECHA] ?? ""),
+    descripcion: String(row[MOV_COL_DESCRIPCION] ?? ""),
+    categoria: String(row[MOV_COL_CATEGORIA] ?? ""),
+    subcategoria: String(row[MOV_COL_SUBCATEGORIA] ?? ""),
+    monto: Number(row[MOV_COL_MONTO] ?? 0),
+    mes: String(row[MOV_COL_MES] ?? ""),
+  }
 }
 
 // ============================================================

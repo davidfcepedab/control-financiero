@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { directionEngine } from "@/lib/directionEngine"
 import { getContext } from "@/lib/getContext"
 
 export default function GlobalHeader() {
@@ -15,8 +14,7 @@ export default function GlobalHeader() {
 
   if (!data) return null
 
-  const direction = directionEngine(data)
-  const gradient = getGradient(direction.fase)
+  const gradient = "bg-gradient-to-br from-[#3FC5BB]/80 via-[#7EDCD3]/70 to-[#93C5FD]/80"
 
   const delta = data.delta_global ?? 0
 
@@ -54,36 +52,7 @@ export default function GlobalHeader() {
           </span>
         </div>
 
-        <div className="mt-6">
-          <p className="text-xl font-semibold">
-            {direction.fase}
-          </p>
-
-          <p className="text-sm opacity-90 mt-2">
-            {direction.shortMessage}
-          </p>
-        </div>
-
       </div>
     </div>
   )
-}
-
-function getGradient(fase: string) {
-  switch (fase) {
-    case "Expansión":
-      return "bg-gradient-to-br from-[#EE3A93]/80 via-[#F472B6]/70 to-[#3FC5BB]/80"
-
-    case "Consolidación":
-      return "bg-gradient-to-br from-[#3FC5BB]/80 via-[#7EDCD3]/70 to-[#93C5FD]/80"
-
-    case "Recomposición":
-      return "bg-gradient-to-br from-[#FFCFA1]/80 via-[#FDE68A]/70 to-[#FDBA74]/80"
-
-    case "Recuperación":
-      return "bg-gradient-to-br from-[#3FC5BB]/70 via-[#A7F3D0]/60 to-[#C7D2FE]/70"
-
-    default:
-      return "bg-gradient-to-br from-[#3FC5BB]/80 via-[#7EDCD3]/70 to-[#93C5FD]/80"
-  }
 }
