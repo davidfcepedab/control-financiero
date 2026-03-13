@@ -80,12 +80,10 @@ export async function GET(req: NextRequest) {
       flujo: flujoTotal,
     })
 
-    const insight = financialInsightEngine({
-      structuralCategories: [],
-      totalFixed: 0,
-      totalVariable: 0,
-      totalStructural: 0,
-    })
+   const insight = financialInsightEngine({
+  ingresos,
+  flujo: flujoTotal,
+})
 
     const stability = financialStabilityEngine({
       ingresos,
