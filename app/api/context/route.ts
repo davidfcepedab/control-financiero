@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
 
 import { predictionEngine } from "@/lib/engines/predictionEngine"
-import { insightEngine } from "@/lib/engines/insightEngine"
+import { financialInsightEngine } from "@/lib/engines/financialInsightEngine"
 
 const SPREADSHEET_ID = "1fEP_Em30-BTUhmeObzAE9zObQRc7CNkYXbVCecpCHO0"
 
@@ -114,7 +114,7 @@ export async function GET() {
     // =====================================
     const prediction = predictionEngine(last14)
 
-    const insights = insightEngine({
+    const insights = financialInsightEngine({
       score_recuperacion: scoreRecuperacion,
       delta_tendencia,
       delta_disciplina: deltaDisciplina,
