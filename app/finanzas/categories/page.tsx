@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import StructuralExecutiveCard from "@/components/finanzas/StructuralExecutiveCard"
 import OperationalSummary from "@/components/finanzas/OperationalSummary"
 import ImpactIndicator from "@/components/finanzas/ImpactIndicator"
-import ExecutionComparison from "@/components/finanzas/ExecutionComparison"
+import { calcularEjecucion, formatMoneda } from "@/lib/testing/financialMetrics"
 
 interface Subcategory {
   name: string
@@ -297,10 +297,19 @@ export default function FinanzasCategories() {
                   </div>
                 )}
 
-                {/* EJECUCIÓN MONETARIA */}
-                {cat.budget && cat.budget > 0 && (
-                  <ExecutionComparison total={cat.total} budget={cat.budget} />
-                )}
+                {/* Execution inline */}
+                {cat.budget && cat.budget > 0 && (() => {
+                  const { diff, tipo } = calcularEjecucion(cat.total, cat.budget)
+                  const isSobre = tipo === "sobre"
+                  return (
+                    <div className="text-xs text-slate-500 mt-1">
+                      <span className={isSobre ? "text-rose-600 font-semibold" : "text-green-600 font-semibold"}>
+                        {isSobre ? "⚠️ Sobre" : "✓ Sub"} ${formatMoneda(diff)}
+                      </span>
+                      <span className="text-slate-400 ml-1">presupuesto</span>
+                    </div>
+                  )
+                })()}
 
                 {/* Expanded subcategories */}
                 {expanded === cat.name && cat.subcategories && (
