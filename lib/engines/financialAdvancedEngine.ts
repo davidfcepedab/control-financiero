@@ -83,7 +83,7 @@ export function financialAdvancedEngine({
         total: value,
       }))
 
-    return {
+return {
   name,
   total: data.total,
   previousTotal,
@@ -91,7 +91,6 @@ export function financialAdvancedEngine({
   type: (FIXED_CATEGORIES.includes(name) ? "fixed" : "variable") as "fixed" | "variable",
   subcategories: subs,  // Cambió de 'subs' a 'subcategories'
 }
-
     
     .filter((c) => Math.abs(c.total) > 0)
 
