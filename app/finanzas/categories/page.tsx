@@ -155,10 +155,11 @@ export default function FinanzasCategories() {
       : 0
 
   const navigateToTransactions = (categoryName: string) => {
-    router.push(
-      `/finanzas/transactions?month=${encodeURIComponent(month_value)}&category=${encodeURIComponent(categoryName)}`
-    )
-  }
+  if (!month_value) return
+  router.push(
+    `/finanzas/transactions?month=${encodeURIComponent(month_value)}&category=${encodeURIComponent(categoryName)}`
+  )
+}
 
   return (
     <div className="space-y-8">
