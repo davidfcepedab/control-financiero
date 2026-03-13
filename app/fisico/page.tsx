@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { getContext } from "@/lib/getContext"
-import { directionEngine } from "@/lib/directionEngine"
 import {
   CircularProgressbar,
   buildStyles,
@@ -44,24 +43,7 @@ export default function Fisico() {
 
   if (!data) return null
 
-  const direction = directionEngine(data)
-
-  const getAccentColor = () => {
-    switch (direction.fase) {
-      case "Expansión":
-        return "#EE3A93"
-      case "Consolidación":
-        return "#3FC5BB"
-      case "Recomposición":
-        return "#FFCFA1"
-      case "Recuperación":
-        return "#3FC5BB"
-      default:
-        return "#3FC5BB"
-    }
-  }
-
-  const accent = getAccentColor()
+  const accent = "#3FC5BB"
 
   const tendencia = data?.tendencia_7d ?? []
 
@@ -174,27 +156,6 @@ export default function Fisico() {
             {data.delta_recuperacion}% vs semana anterior
           </p>
         </div>
-      </div>
-
-      {/* FASE */}
-      <div className="card p-6">
-        <p className="text-xs uppercase tracking-wide text-gray-500">
-          Fase actual
-        </p>
-
-        <p
-          className="text-2xl font-semibold mt-3"
-          style={{ color: accent }}
-        >
-          {direction.fase}
-        </p>
-
-        <p
-          className="text-sm mt-4 leading-relaxed"
-          style={{ color: accent, opacity: 0.8 }}
-        >
-          {direction.mensaje}
-        </p>
       </div>
 
     </div>

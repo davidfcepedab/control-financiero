@@ -38,7 +38,7 @@ export function financialBudgetEngine({
       budget,
       budgetUsedPercent,
       budgetStatus,
-      subcategories: cat.subcategories || [],
+      subcategories: cat.subs || [],
     }
   })
 }

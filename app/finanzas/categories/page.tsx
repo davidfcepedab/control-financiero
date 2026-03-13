@@ -50,18 +50,8 @@ export default function FinanzasCategories() {
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"operativa" | "estrategica" | "predictiva">("operativa")
 
-  const month_value = finance?.month
-
-  if (!finance) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        <p>Inicializando...</p>
-      </div>
-    )
-  }
-
   useEffect(() => {
-    if (!month_value) {
+    if (!month) {
       setData(null)
       return
     }
@@ -72,7 +62,7 @@ export default function FinanzasCategories() {
         setError(null)
 
         const response = await fetch(
-          `/api/finanzas/categories?month=${encodeURIComponent(month_value)}`
+          `/api/finanzas/categories?month=${encodeURIComponent(month)}`
         )
 
         if (!response.ok) {
@@ -97,7 +87,15 @@ export default function FinanzasCategories() {
     }
 
     fetchCategories()
-  }, [month_value])
+  }, [month])
+
+  if (!finance) {
+    return (
+      <div className="p-6 text-center text-gray-500">
+        <p>Inicializando...</p>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -156,7 +154,7 @@ export default function FinanzasCategories() {
 
   const navigateToTransactions = (categoryName: string) => {
     router.push(
-      `/finanzas/transactions?month=${encodeURIComponent(month_value)}&category=${encodeURIComponent(categoryName)}`
+      `/finanzas/transactions?month=${encodeURIComponent(month)}&category=${encodeURIComponent(categoryName)}`
     )
   }
 

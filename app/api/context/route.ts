@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
 
-import { predictionEngine } from "@/lib/engines/predictionEngine"
-import { insightEngine } from "@/lib/engines/insightEngine"
-
 const SPREADSHEET_ID = "1fEP_Em30-BTUhmeObzAE9zObQRc7CNkYXbVCecpCHO0"
 
 export async function GET() {
@@ -110,19 +107,7 @@ export async function GET() {
     }
 
     // =====================================
-    // 5️⃣ PREDICCIÓN + INSIGHTS
-    // =====================================
-    const prediction = predictionEngine(last14)
-
-    const insights = insightEngine({
-      score_recuperacion: scoreRecuperacion,
-      delta_tendencia,
-      delta_disciplina: deltaDisciplina,
-      delta_global: deltaGlobal,
-    })
-
-    // =====================================
-    // 6️⃣ RESPONSE
+    // 5️⃣ RESPONSE
     // =====================================
     return NextResponse.json({
       score_global: scoreGlobal,
@@ -137,8 +122,6 @@ export async function GET() {
       delta_tendencia,
 
       tendencia_7d,
-      prediction,
-      insights,
     })
 
   } catch (error: any) {

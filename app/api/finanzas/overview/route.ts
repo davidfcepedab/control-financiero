@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sheets } from "@/lib/googleAuth"
-import { financialScoreEngine } from "@/lib/engines/financialScoreEngine"
-import { financialInsightEngine } from "@/lib/engines/financialInsightEngine"
-import { financialStabilityEngine } from "@/lib/engines/financialStabilityEngine"
-import { financialPredictionEngine } from "@/lib/engines/financialPredictionEngine"
 import {
   isValidCFORow,
   mapRowToCFOMonthly,
@@ -73,32 +69,6 @@ export async function GET(req: NextRequest) {
           )
         : 0
 
-    const score = financialScoreEngine({
-      ingresos,
-      gastoOp: gastoOperativo,
-      gastoFin: gastoFinanciero,
-      flujo: flujoTotal,
-    })
-
-    const insight = financialInsightEngine({
-      ingresos,
-      flujo: flujoTotal,
-    })
-
-    const stability = financialStabilityEngine({
-      ingresos,
-      gastoOperativo,
-      gastoFinanciero,
-      flujo: flujoTotal,
-      liquidez: liquidezTotal,
-      runway,
-    })
-
-    const prediction = financialPredictionEngine({
-      monthlyHistory: cfoRows.slice(-6).map((r) => r.flujoTotal),
-      liquidez: liquidezTotal,
-    })
-
     return NextResponse.json({
       success: true,
       data: {
@@ -109,10 +79,6 @@ export async function GET(req: NextRequest) {
         monthlyData,
         liquidez: liquidezTotal,
         runway,
-        score,
-        insight,
-        stability,
-        prediction,
       },
     })
   } catch (error: any) {

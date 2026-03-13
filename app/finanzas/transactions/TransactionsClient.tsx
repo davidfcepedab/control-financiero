@@ -28,16 +28,12 @@ export default function TransactionsClient() {
   const finance = useFinance()
   const searchParams = useSearchParams()
   const month = finance?.month ?? ""
-  const category = searchParams.get("category")
-  const subcategory = searchParams.get("subcategory")
+  const categoryFilter = searchParams.get("category")
+  const subcategoryFilter = searchParams.get("subcategory")
 
   const [data, setData] = useState<TransactionsData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const month = finance?.month
-  const categoryFilter = searchParams.get("category")
-  const subcategoryFilter = searchParams.get("subcategory")
 
   useEffect(() => {
     if (!month) return
@@ -49,8 +45,8 @@ export default function TransactionsClient() {
 
         let url = `/api/finanzas/transactions?month=${encodeURIComponent(month)}`
 
-        if (category) {
-          url += `&category=${encodeURIComponent(category)}`
+        if (categoryFilter) {
+          url += `&category=${encodeURIComponent(categoryFilter)}`
         }
 
         if (subcategoryFilter) {
@@ -63,8 +59,7 @@ export default function TransactionsClient() {
           throw new Error(`Error ${response.status}: ${response.statusText}`)
         }
 
-        const res = await fetch(url)
-        const json = await res.json()
+        const json: TransactionsResponse = await response.json()
 
         if (!json.success) {
           throw new Error(json.error || "Error desconocido")
@@ -81,7 +76,7 @@ export default function TransactionsClient() {
       }
     }
 
-    fetchTransactions()
+    fetchData()
   }, [month, categoryFilter, subcategoryFilter])
 
   if (!finance) {
@@ -92,7 +87,6 @@ export default function TransactionsClient() {
     )
   }
 
-  // Estado de carga
   if (loading) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -101,16 +95,18 @@ export default function TransactionsClient() {
     )
   }
 
-  if (loading) return <p>Cargando...</p>
-
-  if (error)
+  if (error) {
     return (
       <div className="p-6 text-center text-gray-500">
         <p>Sin movimientos registrados para este período.</p>
       </div>
     )
+  }
 
   if (!data) return null
+
+  const transactions = data.transactions ?? []
+  const hasTransactions = transactions.length > 0
 
   return (
     <div className="space-y-6">
@@ -144,21 +140,21 @@ export default function TransactionsClient() {
               className="flex justify-between items-center p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
             >
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{tx.descripcion}</p>
-                <p className="text-xs text-gray-500 mt-1">{tx.fecha}</p>
-                {tx.categoria && (
+                <p className="font-medium text-gray-900">{tx.description}</p>
+                <p className="text-xs text-gray-500 mt-1">{tx.date}</p>
+                {tx.category && (
                   <p className="text-xs text-gray-400 mt-1">
-                    {tx.categoria}
-                    {tx.subcategoria && ` › ${tx.subcategoria}`}
+                    {tx.category}
+                    {tx.subcategory && ` › ${tx.subcategory}`}
                   </p>
                 )}
               </div>
 
               <div className="text-right">
                 <p className={`font-semibold text-lg ${
-                  tx.monto < 0 ? "text-red-600" : "text-green-600"
+                  tx.amount < 0 ? "text-red-600" : "text-green-600"
                 }`}>
-                  {tx.monto < 0 ? "-" : "+"}${Math.abs(tx.monto).toLocaleString("es-CO")}
+                  {tx.amount < 0 ? "-" : "+"}${Math.abs(tx.amount).toLocaleString("es-CO")}
                 </p>
               </div>
             </div>
