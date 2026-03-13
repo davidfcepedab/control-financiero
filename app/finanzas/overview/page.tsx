@@ -36,6 +36,7 @@ interface OverviewResponse {
 }
 
 export default function FinanzasOverview() {
+  export default function FinanzasOverview() {
   const finance = useFinance()
   const month = finance?.month ?? ""
 
@@ -43,13 +44,44 @@ export default function FinanzasOverview() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const month = finance?.month
-
   useEffect(() => {
     if (!month) {
       setData(null)
       return
     }
+
+    const fetchOverview = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch(
+          `/api/finanzas/overview?month=${encodeURIComponent(month)}`
+        )
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`)
+        }
+
+        const json: OverviewResponse = await response.json()
+
+        if (!json.success) {
+          throw new Error(json.error || "Error desconocido")
+        }
+
+        setData(json.data ?? null)
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Error desconocido"
+        setError(errorMessage)
+        setData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOverview()
+  }, [month])
 
     const fetchOverview = async () => {
       try {
