@@ -114,7 +114,7 @@ export async function GET() {
     // =====================================
     const prediction = predictionEngine(last14)
 
-    const insights = []
+    const insights: string[] = []
 
     // =====================================
     // 6️⃣ RESPONSE
