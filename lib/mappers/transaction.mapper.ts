@@ -1,11 +1,4 @@
-export interface Transaction {
-  id: string
-  date: string
-  description: string
-  category: string
-  subcategory: string
-  amount: number
-}
+import type { Transaction } from "@/lib/types"
 
 /**
  * Filters raw Movimientos rows by month (col 12) and optional category (col 6).
@@ -28,15 +21,14 @@ export function filterTransactionRows(
 
 /**
  * Maps a single raw Movimientos row to a typed Transaction object.
- * Column positions: [0] date, [5] description, [6] category, [7] subcategory, [10] amount.
+ * Column positions: [0] date/fecha, [5] description/descripcion, [6] category/categoria, [7] subcategory/subcategoria, [10] amount/monto.
  */
-export function mapRowToTransaction(row: any[], index: number): Transaction {
+export function mapRowToTransaction(row: any[]): Transaction {
   return {
-    id: `${row?.[0] || ""}-${index}`,
-    date: row?.[0] || "",
-    description: row?.[5] || "",
-    category: row?.[6] || "",
-    subcategory: row?.[7] || "",
-    amount: Number(row?.[10] || 0),
+    fecha: row?.[0] || "",
+    descripcion: row?.[5] || "",
+    categoria: row?.[6] || "",
+    subcategoria: row?.[7] || "",
+    monto: Number(row?.[10] || 0),
   }
 }
