@@ -21,6 +21,16 @@ export interface AnomaliasOperacionales {
   zeroGasto: number
 }
 
+export interface OperationalCategory {
+  name: string
+  type: "fixed" | "variable"
+  total: number
+  previousTotal?: number
+  delta?: number
+  budget?: number
+  budgetUsedPercent?: number
+}
+
 /**
  * Calcula métricas estructurales (fijos vs variables)
  * 
@@ -90,14 +100,15 @@ export function calcularEjecucion(
 /**
  * Analiza anomalías operacionales en categorías
  */
-export function detectarAnomalias(categories: any[]): AnomaliasOperacionales {
+export function detectarAnomalias(categories: OperationalCategory[]): AnomaliasOperacionales {
   return {
-    overBudget: categories.filter((c) => c.budgetUsedPercent >= 100).length,
+    overBudget: categories.filter((c) => (c.budgetUsedPercent ?? 0) >= 100).length,
     highDelta: categories.filter(
-      (c) => Math.abs(c.delta) > 0.25 * Math.abs(c.previousTotal || 0)
+      (c) => Math.abs(c.delta ?? 0) > 0.25 * Math.abs(c.previousTotal || 0)
     ).length,
-    lowUsage: categories.filter((c) => c.budgetUsedPercent > 0 && c.budgetUsedPercent < 10)
-      .length,
+    lowUsage: categories.filter(
+      (c) => (c.budgetUsedPercent ?? 0) > 0 && (c.budgetUsedPercent ?? 0) < 10
+    ).length,
     zeroGasto: categories.filter((c) => c.total === 0 && c.previousTotal !== 0).length,
   }
 }
