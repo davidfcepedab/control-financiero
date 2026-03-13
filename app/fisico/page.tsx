@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { getContext } from "@/lib/getContext"
-import { directionEngine } from "@/lib/directionEngine"
 import {
   CircularProgressbar,
   buildStyles,
@@ -14,13 +13,28 @@ import {
 } from "recharts"
 import "react-circular-progressbar/dist/styles.css"
 
+interface TendenciaItem {
+  value: number
+}
+
+interface ContextData {
+  score_fisico: number
+  score_disciplina: number
+  score_recuperacion: number
+  delta_disciplina: number
+  delta_recuperacion: number
+  tendencia_7d: TendenciaItem[]
+}
+
 export default function Fisico() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<ContextData | null>(null)
   const [animatedValue, setAnimatedValue] = useState(0)
 
   useEffect(() => {
-    getContext().then((res) => {
+    const fetchData = async () => {
+      const res = await getContext()
       if (!res) return
+
       setData(res)
 
       const score = res.score_fisico ?? 0
@@ -39,47 +53,32 @@ export default function Fisico() {
       }
 
       animate()
-    })
+    }
+
+    fetchData()
   }, [])
 
   if (!data) return null
 
-  const direction = directionEngine(data)
-
-  const getAccentColor = () => {
-    switch (direction.fase) {
-      case "Expansión":
-        return "#EE3A93"
-      case "Consolidación":
-        return "#3FC5BB"
-      case "Recomposición":
-        return "#FFCFA1"
-      case "Recuperación":
-        return "#3FC5BB"
-      default:
-        return "#3FC5BB"
-    }
-  }
-
-  const accent = getAccentColor()
-
-  const tendencia = data?.tendencia_7d ?? []
+  const tendencia = data.tendencia_7d ?? []
 
   const average =
     tendencia.length > 0
-      ? tendencia.reduce((acc: number, v: any) => acc + v.value, 0) /
+      ? tendencia.reduce((acc, v) => acc + v.value, 0) /
         tendencia.length
       : 0
 
-  const tendenciaWithAverage = tendencia.map((v: any) => ({
+  const tendenciaWithAverage = tendencia.map((v) => ({
     value: v.value,
     average,
   }))
 
+  const accent = "#3FC5BB"
+
   return (
     <div className="space-y-8">
 
-      {/* RING */}
+      {/* SCORE RING */}
       <div className="card p-8">
         <div className="w-44 mx-auto">
           <CircularProgressbar
@@ -99,10 +98,10 @@ export default function Fisico() {
         </p>
       </div>
 
-      {/* TENDENCIA */}
+      {/* TENDENCIA 7 DÍAS */}
       <div className="card p-6">
         <p className="text-sm text-gray-500 mb-4">
-          TENDENCIA 7 DÍAS
+          Tendencia 7 Días
         </p>
 
         <ResponsiveContainer width="100%" height={120}>
@@ -129,7 +128,7 @@ export default function Fisico() {
       {/* DISCIPLINA + RECUPERACIÓN */}
       <div className="grid grid-cols-2 gap-4">
 
-        <div className="card text-center">
+        <div className="card text-center p-6">
           <p className="text-xs uppercase tracking-wide text-gray-500">
             Disciplina
           </p>
@@ -152,7 +151,7 @@ export default function Fisico() {
           </p>
         </div>
 
-        <div className="card text-center">
+        <div className="card text-center p-6">
           <p className="text-xs uppercase tracking-wide text-gray-500">
             Recuperación
           </p>
@@ -174,27 +173,7 @@ export default function Fisico() {
             {data.delta_recuperacion}% vs semana anterior
           </p>
         </div>
-      </div>
 
-      {/* FASE */}
-      <div className="card p-6">
-        <p className="text-xs uppercase tracking-wide text-gray-500">
-          Fase actual
-        </p>
-
-        <p
-          className="text-2xl font-semibold mt-3"
-          style={{ color: accent }}
-        >
-          {direction.fase}
-        </p>
-
-        <p
-          className="text-sm mt-4 leading-relaxed"
-          style={{ color: accent, opacity: 0.8 }}
-        >
-          {direction.mensaje}
-        </p>
       </div>
 
     </div>
