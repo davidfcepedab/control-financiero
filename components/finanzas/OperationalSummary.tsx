@@ -1,18 +1,9 @@
 "use client"
 
-import { detectarAnomalias } from "@/lib/testing/financialMetrics"
-
-interface Category {
-  name: string
-  type: "fixed" | "variable"
-  total: number
-  previousTotal?: number
-  budget: number
-  budgetUsedPercent: number
-}
+import { detectarAnomalias, OperationalCategory } from "@/lib/testing/financialMetrics"
 
 interface Props {
-  categories: Category[]
+  categories: OperationalCategory[]
 }
 
 export default function OperationalSummary({ categories }: Props) {

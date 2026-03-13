@@ -18,6 +18,7 @@ interface Category {
   type: "fixed" | "variable"
   total: number
   previousTotal?: number
+  delta?: number
   budget?: number
   budgetUsedPercent?: number
   budgetStatus?: "green" | "yellow" | "red"
@@ -50,13 +51,6 @@ export default function FinanzasCategories() {
   const [viewMode, setViewMode] = useState<"operativa" | "estrategica" | "predictiva">("operativa")
 
   const month_value = finance?.month
-
-  useEffect(() => {
-    if (!month_value) return
-    fetch(`/api/finanzas/categories?month=${month_value}`)
-      .then(res => res.json())
-      .then(setData)
-  }, [month_value])
 
   if (!finance) {
     return (
@@ -137,11 +131,7 @@ export default function FinanzasCategories() {
     totalStructural = 0,
   } = data
 
-  const absFixed = Math.abs(totalFixed)
-  const absVariable = Math.abs(totalVariable)
-  const structuralTotal = absFixed + absVariable
-
-  if (structuralTotal === 0) {
+  if (totalStructural === 0) {
     return (
       <div className="p-6 text-center bg-gray-50 rounded-lg">
         <p className="text-gray-600">
@@ -160,8 +150,8 @@ export default function FinanzasCategories() {
     .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
 
   const fixedPct =
-    structuralTotal > 0
-      ? Math.round((absFixed / structuralTotal) * 100)
+    Math.abs(totalStructural) > 0
+      ? Math.round((Math.abs(totalFixed) / Math.abs(totalStructural)) * 100)
       : 0
 
   const navigateToTransactions = (categoryName: string) => {
