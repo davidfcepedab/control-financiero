@@ -273,6 +273,14 @@ export default function FinanzasCategories() {
                         </span>
                       </div>
                     ))}
+
+                    <button
+                      onClick={() => navigateToTransactions(cat.name)}
+                      aria-label={`Ver todas las transacciones de ${cat.name}`}
+                      className="mt-3 w-full py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg transition"
+                    >
+                      → Ver todas las transacciones
+                    </button>
                   </div>
                 )}
               </div>
